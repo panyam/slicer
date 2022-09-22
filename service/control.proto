@@ -1,0 +1,156 @@
+syntax = "proto3";
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/field_mask.proto";
+option go_package = "github.com/panyam/slicer/control";
+package protos;
+
+/**
+ * The control plane for managing where Screens are served out of.
+ * As we go beyond a single host, screen services (mainly the streamer for now)
+ * will be served from different shards and a single way to manage this is needed.
+ * Whether the SoT for shard info/discovery/records is distributed or centralized
+ * having a single service/endpoint serve this makes things extendible later on.
+ */
+service ControlService {
+  /**
+   * Returns information about a host as to which shards it (manually) hosts.
+   */
+  rpc GetTarget(GetTargetRequest) returns (Target) {}
+
+  /**
+   * Called to update a target (most likely its status).
+   */
+  rpc SaveTarget(UpdateTargetRequest) returns (Target) {}
+
+  /**
+   * Deletes/Removes a target - should also remove all associated shards.
+   */
+  rpc DeleteTarget(DeleteTargetRequest) returns (Target) {}
+
+  /**
+   * Return all hosts participating in this cluster.
+   */
+  rpc ListTargets(ListTargetsRequest) returns (ListTargetsResponse) {}
+
+  // Called by clients tht want to know where to connect to for a particular shard.
+  /**
+   * Get the source of truth/current snapshot of assignments of a shard key
+   * to a set of handler addresses
+   */
+  rpc GetShard(GetShardRequest) returns (GetShardResponse) {}
+
+  /**
+   * Called by what ever is interested in notifying the controller of
+   * updates to membership.
+   */
+  rpc SaveShard(SaveShardRequest) returns (SaveShardResponse) {}
+
+  /**
+   * Called by admin to delete a shard completely or particular targets for it
+   */
+  rpc DeleteShard(DeleteShardRequest) returns (DeleteShardResponse) {}
+
+  /**
+   * Shard clients (those who need to reach to a particular host that serves a shard)
+   * will want to be notified when shard assignments have changed (failover, replicas,
+   * rebalancing etc) so that they can reconnect.   This method provides a way for
+   * clients to be notified when these have changed.
+   */
+  rpc Connect(stream ControlRequest) returns (stream ControlMessage);
+}
+
+message GetTargetRequest {
+  string address = 1;
+}
+
+message Target {
+  string address = 1;
+  string status = 2;
+  google.protobuf.Timestamp updated_at = 3;
+  google.protobuf.Timestamp pinged_at = 4;
+  repeated ShardKey shards = 5;
+  repeated string tags = 6;
+}
+
+message ListTargetsRequest {
+}
+
+message ListTargetsResponse {
+  repeated Target hosts = 1;
+}
+
+message UpdateTargetRequest {
+  Target target = 1;
+  google.protobuf.FieldMask update_mask = 2;
+}
+
+message DeleteTargetRequest {
+  string address = 1;
+}
+
+/**
+ * A way to describe a shard.
+ */
+message ShardKey {
+  string key = 1;
+}
+
+message GetShardRequest {
+  ShardKey shard = 1;
+}
+
+message GetShardResponse {
+  Shard shard = 1;
+}
+
+message Shard {
+  ShardKey key = 1;
+  repeated Target targets = 2;
+}
+
+message SaveShardRequest {
+  Shard shard = 1;
+  google.protobuf.FieldMask update_mask = 2;
+}
+
+message SaveShardResponse {
+}
+
+message DeleteShardRequest {
+  ShardKey key = 1;
+  repeated string addresses = 2;
+}
+
+message DeleteShardResponse {
+}
+
+
+message ControlRequest {
+  int64 request_id = 1;
+  oneof details {
+    SubscribeRequest subscribe_request = 2;
+    UnsubscribeRequest unsubscribe_request = 3;
+    AddShardsRequest add_shards_request = 4;
+    RemoveShardsRequest remove_shards_request = 5;
+  }
+}
+
+message SubscribeRequest {
+  repeated Shard shards = 1;
+}
+
+message UnsubscribeRequest {
+  repeated Shard shards = 1;
+}
+
+message AddShardsRequest {
+  repeated Shard shards = 1;
+}
+
+message RemoveShardsRequest {
+  repeated Shard shards = 1;
+}
+
+message ControlMessage {
+  int64 request_id = 1;
+}

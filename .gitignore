@@ -1,0 +1,6 @@
+.cache/
+.vagrant
+pgdata*
+__pycache__
+*.swp
+service/pyslicer
