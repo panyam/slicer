@@ -15,17 +15,17 @@ service ControlService {
   /**
    * Returns information about a host as to which shards it (manually) hosts.
    */
-  rpc GetTarget(GetTargetRequest) returns (Target) {}
+  rpc GetTargets(GetTargetsRequest) returns (GetTargetsResponse) {}
 
   /**
    * Called to update a target (most likely its status).
    */
-  rpc SaveTarget(UpdateTargetRequest) returns (Target) {}
+  rpc SaveTarget(SaveTargetRequest) returns (Target) {}
 
   /**
    * Deletes/Removes a target - should also remove all associated shards.
    */
-  rpc DeleteTarget(DeleteTargetRequest) returns (Target) {}
+  rpc DeleteTargets(DeleteTargetsRequest) returns (DeleteTargetsRequest) {}
 
   /**
    * Return all hosts participating in this cluster.
@@ -59,8 +59,13 @@ service ControlService {
   rpc Connect(stream ControlRequest) returns (stream ControlMessage);
 }
 
-message GetTargetRequest {
-  string address = 1;
+message GetTargetsRequest {
+  repeated string address = 1;
+  bool include_shards = 2;
+}
+
+message GetTargetsResponse {
+  repeated Target targets = 1;
 }
 
 message Target {
@@ -68,24 +73,29 @@ message Target {
   string status = 2;
   google.protobuf.Timestamp updated_at = 3;
   google.protobuf.Timestamp pinged_at = 4;
-  repeated ShardKey shards = 5;
-  repeated string tags = 6;
+  repeated string tags = 5;
+  repeated ShardKey shards = 6;
 }
 
 message ListTargetsRequest {
+  bool include_shards = 1;
 }
 
 message ListTargetsResponse {
   repeated Target hosts = 1;
 }
 
-message UpdateTargetRequest {
+message SaveTargetRequest {
   Target target = 1;
   google.protobuf.FieldMask update_mask = 2;
 }
 
-message DeleteTargetRequest {
+message DeleteTargetsRequest {
   string address = 1;
+}
+
+message DeleteTargetsResponse {
+  repeated Target targets = 1;
 }
 
 /**

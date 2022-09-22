@@ -6,6 +6,7 @@ import (
 	tspb "google.golang.org/protobuf/types/known/timestamppb"
 )
 
+/*
 func ShardToProto(input *db.Shard) (out *Shard) {
 	targets := gut.Map(input.Targets, TargetToProto)
 	out = &Shard{
@@ -25,6 +26,7 @@ func ShardFromProto(input *Shard) (out *db.Shard) {
 	}
 	return
 }
+*/
 
 func TargetToProto(input *db.Target) (out *Target) {
 	out = &Target{
@@ -36,7 +38,7 @@ func TargetToProto(input *db.Target) (out *Target) {
 }
 
 func TargetFromProto(input *Target) (out *db.Target) {
-	out = &Target{
+	out = &db.Target{
 		Address:   input.Address,
 		Status:    input.Status,
 		UpdatedAt: input.UpdatedAt.AsTime(),

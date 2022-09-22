@@ -3,6 +3,7 @@ package control
 import (
 	"context"
 	"fmt"
+	gut "github.com/panyam/goutils/utils"
 	"github.com/panyam/slicer/db"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -20,15 +21,17 @@ func NewControlService(ctrldb db.ControlDB) (out *ControlService) {
 	return
 }
 
-func (s *ControlService) GetTarget(ctx context.Context, request *GetTargetRequest) (resp *Target, err error) {
+func (s *ControlService) GetTarget(ctx context.Context, request *GetTargetsRequest) (resp *GetTargetsResponse, err error) {
 	resp = nil
 	err = nil
-	target, err := s.ControlDB.GetTarget(request.Address)
-	if target == nil {
+	targets, err := s.ControlDB.GetTargets(request.Address)
+	if targets == nil {
 		resp = nil
 		err = status.Error(codes.NotFound, fmt.Sprintf("Target not found: %s", request.Address))
 	} else {
-		resp = TargetToProto(target)
+		resp = &GetTargetsResponse{
+			Targets: gut.Map(targets, TargetToProto),
+		}
 	}
 	return
 }
@@ -36,17 +39,17 @@ func (s *ControlService) GetTarget(ctx context.Context, request *GetTargetReques
 func (s *ControlService) GetShard(ctx context.Context, request *GetShardRequest) (resp *GetShardResponse, err error) {
 	resp = nil
 	err = nil
-	shard, err := s.ControlDB.GetShard(request.Shard.Key)
-	if shard == nil {
+	shards, err := s.ControlDB.GetShards(request.Shard.Key)
+	if shards == nil {
 		resp = &GetShardResponse{}
 	} else {
 		resp = &GetShardResponse{
-			Shard: ShardToProto(shard),
+			Shard: gut.Map(shards, ShardToProto),
 		}
 	}
 	return
 }
 
-func (s *ControlService) UpdateShard(ctx context.Context, request *UpdateShardRequest) (resp *UpdateShardResponse, err error) {
+func (s *ControlService) SaveShard(ctx context.Context, request *SaveShardRequest) (resp *SaveShardResponse, err error) {
 	return
 }

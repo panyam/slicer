@@ -20,20 +20,20 @@ class ControlServiceStub(object):
         Args:
             channel: A grpc.Channel.
         """
-        self.GetTarget = channel.unary_unary(
-                '/protos.ControlService/GetTarget',
-                request_serializer=service_dot_control__pb2.GetTargetRequest.SerializeToString,
-                response_deserializer=service_dot_control__pb2.Target.FromString,
+        self.GetTargets = channel.unary_unary(
+                '/protos.ControlService/GetTargets',
+                request_serializer=service_dot_control__pb2.GetTargetsRequest.SerializeToString,
+                response_deserializer=service_dot_control__pb2.GetTargetsResponse.FromString,
                 )
         self.SaveTarget = channel.unary_unary(
                 '/protos.ControlService/SaveTarget',
-                request_serializer=service_dot_control__pb2.UpdateTargetRequest.SerializeToString,
+                request_serializer=service_dot_control__pb2.SaveTargetRequest.SerializeToString,
                 response_deserializer=service_dot_control__pb2.Target.FromString,
                 )
-        self.DeleteTarget = channel.unary_unary(
-                '/protos.ControlService/DeleteTarget',
-                request_serializer=service_dot_control__pb2.DeleteTargetRequest.SerializeToString,
-                response_deserializer=service_dot_control__pb2.Target.FromString,
+        self.DeleteTargets = channel.unary_unary(
+                '/protos.ControlService/DeleteTargets',
+                request_serializer=service_dot_control__pb2.DeleteTargetsRequest.SerializeToString,
+                response_deserializer=service_dot_control__pb2.DeleteTargetsRequest.FromString,
                 )
         self.ListTargets = channel.unary_unary(
                 '/protos.ControlService/ListTargets',
@@ -71,7 +71,7 @@ class ControlServiceServicer(object):
     having a single service/endpoint serve this makes things extendible later on.
     """
 
-    def GetTarget(self, request, context):
+    def GetTargets(self, request, context):
         """*
         Returns information about a host as to which shards it (manually) hosts.
         """
@@ -87,7 +87,7 @@ class ControlServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def DeleteTarget(self, request, context):
+    def DeleteTargets(self, request, context):
         """*
         Deletes/Removes a target - should also remove all associated shards.
         """
@@ -145,20 +145,20 @@ class ControlServiceServicer(object):
 
 def add_ControlServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
-            'GetTarget': grpc.unary_unary_rpc_method_handler(
-                    servicer.GetTarget,
-                    request_deserializer=service_dot_control__pb2.GetTargetRequest.FromString,
-                    response_serializer=service_dot_control__pb2.Target.SerializeToString,
+            'GetTargets': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetTargets,
+                    request_deserializer=service_dot_control__pb2.GetTargetsRequest.FromString,
+                    response_serializer=service_dot_control__pb2.GetTargetsResponse.SerializeToString,
             ),
             'SaveTarget': grpc.unary_unary_rpc_method_handler(
                     servicer.SaveTarget,
-                    request_deserializer=service_dot_control__pb2.UpdateTargetRequest.FromString,
+                    request_deserializer=service_dot_control__pb2.SaveTargetRequest.FromString,
                     response_serializer=service_dot_control__pb2.Target.SerializeToString,
             ),
-            'DeleteTarget': grpc.unary_unary_rpc_method_handler(
-                    servicer.DeleteTarget,
-                    request_deserializer=service_dot_control__pb2.DeleteTargetRequest.FromString,
-                    response_serializer=service_dot_control__pb2.Target.SerializeToString,
+            'DeleteTargets': grpc.unary_unary_rpc_method_handler(
+                    servicer.DeleteTargets,
+                    request_deserializer=service_dot_control__pb2.DeleteTargetsRequest.FromString,
+                    response_serializer=service_dot_control__pb2.DeleteTargetsRequest.SerializeToString,
             ),
             'ListTargets': grpc.unary_unary_rpc_method_handler(
                     servicer.ListTargets,
@@ -202,7 +202,7 @@ class ControlService(object):
     """
 
     @staticmethod
-    def GetTarget(request,
+    def GetTargets(request,
             target,
             options=(),
             channel_credentials=None,
@@ -212,9 +212,9 @@ class ControlService(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/protos.ControlService/GetTarget',
-            service_dot_control__pb2.GetTargetRequest.SerializeToString,
-            service_dot_control__pb2.Target.FromString,
+        return grpc.experimental.unary_unary(request, target, '/protos.ControlService/GetTargets',
+            service_dot_control__pb2.GetTargetsRequest.SerializeToString,
+            service_dot_control__pb2.GetTargetsResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
@@ -230,13 +230,13 @@ class ControlService(object):
             timeout=None,
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/protos.ControlService/SaveTarget',
-            service_dot_control__pb2.UpdateTargetRequest.SerializeToString,
+            service_dot_control__pb2.SaveTargetRequest.SerializeToString,
             service_dot_control__pb2.Target.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
     @staticmethod
-    def DeleteTarget(request,
+    def DeleteTargets(request,
             target,
             options=(),
             channel_credentials=None,
@@ -246,9 +246,9 @@ class ControlService(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/protos.ControlService/DeleteTarget',
-            service_dot_control__pb2.DeleteTargetRequest.SerializeToString,
-            service_dot_control__pb2.Target.FromString,
+        return grpc.experimental.unary_unary(request, target, '/protos.ControlService/DeleteTargets',
+            service_dot_control__pb2.DeleteTargetsRequest.SerializeToString,
+            service_dot_control__pb2.DeleteTargetsRequest.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 

@@ -20,13 +20,13 @@ const _ = grpc.SupportPackageIsVersion7
 type ControlServiceClient interface {
 	//*
 	// Returns information about a host as to which shards it (manually) hosts.
-	GetTarget(ctx context.Context, in *GetTargetRequest, opts ...grpc.CallOption) (*Target, error)
+	GetTargets(ctx context.Context, in *GetTargetsRequest, opts ...grpc.CallOption) (*GetTargetsResponse, error)
 	//*
 	// Called to update a target (most likely its status).
-	SaveTarget(ctx context.Context, in *UpdateTargetRequest, opts ...grpc.CallOption) (*Target, error)
+	SaveTarget(ctx context.Context, in *SaveTargetRequest, opts ...grpc.CallOption) (*Target, error)
 	//*
 	// Deletes/Removes a target - should also remove all associated shards.
-	DeleteTarget(ctx context.Context, in *DeleteTargetRequest, opts ...grpc.CallOption) (*Target, error)
+	DeleteTargets(ctx context.Context, in *DeleteTargetsRequest, opts ...grpc.CallOption) (*DeleteTargetsRequest, error)
 	//*
 	// Return all hosts participating in this cluster.
 	ListTargets(ctx context.Context, in *ListTargetsRequest, opts ...grpc.CallOption) (*ListTargetsResponse, error)
@@ -57,16 +57,16 @@ func NewControlServiceClient(cc grpc.ClientConnInterface) ControlServiceClient {
 	return &controlServiceClient{cc}
 }
 
-func (c *controlServiceClient) GetTarget(ctx context.Context, in *GetTargetRequest, opts ...grpc.CallOption) (*Target, error) {
-	out := new(Target)
-	err := c.cc.Invoke(ctx, "/protos.ControlService/GetTarget", in, out, opts...)
+func (c *controlServiceClient) GetTargets(ctx context.Context, in *GetTargetsRequest, opts ...grpc.CallOption) (*GetTargetsResponse, error) {
+	out := new(GetTargetsResponse)
+	err := c.cc.Invoke(ctx, "/protos.ControlService/GetTargets", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *controlServiceClient) SaveTarget(ctx context.Context, in *UpdateTargetRequest, opts ...grpc.CallOption) (*Target, error) {
+func (c *controlServiceClient) SaveTarget(ctx context.Context, in *SaveTargetRequest, opts ...grpc.CallOption) (*Target, error) {
 	out := new(Target)
 	err := c.cc.Invoke(ctx, "/protos.ControlService/SaveTarget", in, out, opts...)
 	if err != nil {
@@ -75,9 +75,9 @@ func (c *controlServiceClient) SaveTarget(ctx context.Context, in *UpdateTargetR
 	return out, nil
 }
 
-func (c *controlServiceClient) DeleteTarget(ctx context.Context, in *DeleteTargetRequest, opts ...grpc.CallOption) (*Target, error) {
-	out := new(Target)
-	err := c.cc.Invoke(ctx, "/protos.ControlService/DeleteTarget", in, out, opts...)
+func (c *controlServiceClient) DeleteTargets(ctx context.Context, in *DeleteTargetsRequest, opts ...grpc.CallOption) (*DeleteTargetsRequest, error) {
+	out := new(DeleteTargetsRequest)
+	err := c.cc.Invoke(ctx, "/protos.ControlService/DeleteTargets", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -157,13 +157,13 @@ func (x *controlServiceConnectClient) Recv() (*ControlMessage, error) {
 type ControlServiceServer interface {
 	//*
 	// Returns information about a host as to which shards it (manually) hosts.
-	GetTarget(context.Context, *GetTargetRequest) (*Target, error)
+	GetTargets(context.Context, *GetTargetsRequest) (*GetTargetsResponse, error)
 	//*
 	// Called to update a target (most likely its status).
-	SaveTarget(context.Context, *UpdateTargetRequest) (*Target, error)
+	SaveTarget(context.Context, *SaveTargetRequest) (*Target, error)
 	//*
 	// Deletes/Removes a target - should also remove all associated shards.
-	DeleteTarget(context.Context, *DeleteTargetRequest) (*Target, error)
+	DeleteTargets(context.Context, *DeleteTargetsRequest) (*DeleteTargetsRequest, error)
 	//*
 	// Return all hosts participating in this cluster.
 	ListTargets(context.Context, *ListTargetsRequest) (*ListTargetsResponse, error)
@@ -191,14 +191,14 @@ type ControlServiceServer interface {
 type UnimplementedControlServiceServer struct {
 }
 
-func (UnimplementedControlServiceServer) GetTarget(context.Context, *GetTargetRequest) (*Target, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetTarget not implemented")
+func (UnimplementedControlServiceServer) GetTargets(context.Context, *GetTargetsRequest) (*GetTargetsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetTargets not implemented")
 }
-func (UnimplementedControlServiceServer) SaveTarget(context.Context, *UpdateTargetRequest) (*Target, error) {
+func (UnimplementedControlServiceServer) SaveTarget(context.Context, *SaveTargetRequest) (*Target, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SaveTarget not implemented")
 }
-func (UnimplementedControlServiceServer) DeleteTarget(context.Context, *DeleteTargetRequest) (*Target, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method DeleteTarget not implemented")
+func (UnimplementedControlServiceServer) DeleteTargets(context.Context, *DeleteTargetsRequest) (*DeleteTargetsRequest, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteTargets not implemented")
 }
 func (UnimplementedControlServiceServer) ListTargets(context.Context, *ListTargetsRequest) (*ListTargetsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListTargets not implemented")
@@ -228,26 +228,26 @@ func RegisterControlServiceServer(s grpc.ServiceRegistrar, srv ControlServiceSer
 	s.RegisterService(&ControlService_ServiceDesc, srv)
 }
 
-func _ControlService_GetTarget_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetTargetRequest)
+func _ControlService_GetTargets_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetTargetsRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ControlServiceServer).GetTarget(ctx, in)
+		return srv.(ControlServiceServer).GetTargets(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/protos.ControlService/GetTarget",
+		FullMethod: "/protos.ControlService/GetTargets",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ControlServiceServer).GetTarget(ctx, req.(*GetTargetRequest))
+		return srv.(ControlServiceServer).GetTargets(ctx, req.(*GetTargetsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _ControlService_SaveTarget_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(UpdateTargetRequest)
+	in := new(SaveTargetRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -259,25 +259,25 @@ func _ControlService_SaveTarget_Handler(srv interface{}, ctx context.Context, de
 		FullMethod: "/protos.ControlService/SaveTarget",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ControlServiceServer).SaveTarget(ctx, req.(*UpdateTargetRequest))
+		return srv.(ControlServiceServer).SaveTarget(ctx, req.(*SaveTargetRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _ControlService_DeleteTarget_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(DeleteTargetRequest)
+func _ControlService_DeleteTargets_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteTargetsRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ControlServiceServer).DeleteTarget(ctx, in)
+		return srv.(ControlServiceServer).DeleteTargets(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/protos.ControlService/DeleteTarget",
+		FullMethod: "/protos.ControlService/DeleteTargets",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ControlServiceServer).DeleteTarget(ctx, req.(*DeleteTargetRequest))
+		return srv.(ControlServiceServer).DeleteTargets(ctx, req.(*DeleteTargetsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -388,16 +388,16 @@ var ControlService_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*ControlServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "GetTarget",
-			Handler:    _ControlService_GetTarget_Handler,
+			MethodName: "GetTargets",
+			Handler:    _ControlService_GetTargets_Handler,
 		},
 		{
 			MethodName: "SaveTarget",
 			Handler:    _ControlService_SaveTarget_Handler,
 		},
 		{
-			MethodName: "DeleteTarget",
-			Handler:    _ControlService_DeleteTarget_Handler,
+			MethodName: "DeleteTargets",
+			Handler:    _ControlService_DeleteTargets_Handler,
 		},
 		{
 			MethodName: "ListTargets",
