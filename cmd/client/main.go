@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"github.com/gin-gonic/gin"
+	"google.golang.org/protobuf/reflect/protoreflect"
 )
 
 /**
@@ -18,10 +19,54 @@ var (
 )
 
 func main() {
+	flag.Parse()
 	router := gin.Default()
 
+	// Updating the controller itself
+	router.GET("/control/:prefix/:shard/:input/", func(ctx *gin.Context) {
+		shard := ctx.Param("shard")
+		client := clientmgr.GetClient(shard)
+		response, err := client.Echo(&Request{
+			Prefix: ctx.Param("prefix"),
+			Shard:  shard,
+			Input:  ctx.Param("input"),
+		})
+		sendResponse(response)
+	})
+
 	router.GET("/:prefix/:shard/:input/", func(ctx *gin.Context) {
-		// TODO -- Find the right client and send it and return the response
+		shard := ctx.Param("shard")
+		client := clientmgr.Get(shard)
+		response, err := client.Echo(&Request{
+			Prefix: ctx.Param("prefix"),
+			Shard:  shard,
+			Input:  ctx.Param("input"),
+		})
+		sendResponse(response)
 	})
 	router.Run(*addr)
+}
+
+func sendResponse(ctx *gin.Context, resp protoreflect.ProtoMessage, err error) {
+	if err != nil {
+		if er, ok := status.FromError(err); ok {
+			code := er.Code()
+			msg := er.Message()
+			httpCode := http.StatusInternalServerError
+			// see if we have a specific client error
+			if code == codes.PermissionDenied {
+				httpCode = http.StatusForbidden
+			} else if code == codes.NotFound {
+				httpCode = http.StatusNotFound
+			} else if code == codes.AlreadyExists {
+				httpCode = http.StatusConflict
+			} else if code == codes.InvalidArgument {
+				httpCode = http.StatusBadRequest
+			}
+			ctx.JSON(httpCode, gin.H{"error": code, "message": msg})
+		}
+	} else {
+		jsonData := utils.ProtoToJson(resp)
+		ctx.Data(http.StatusOK, gin.MIMEJSON, jsonData)
+	}
 }

@@ -4,6 +4,27 @@ import "google/protobuf/field_mask.proto";
 option go_package = "github.com/panyam/slicer/control";
 package protos;
 
+enum ShardState {
+  /**
+   * Shard is active, available and can be served.
+   */
+  ACTIVE = 0;
+
+  /**
+   * Shard is unavailable - may never have been here.
+   */
+  UNAVAILABLE = 1;
+
+  /**
+   * Shard is being loaded after an assignment (eg a partition has been
+   * assigned a shard it needs to build/initialize/copy from perhaps another replica).
+   * This can also mean that a shard target came back after being offline
+   * (eg due to a network partition) and the shard can be asked to resync/reload to
+   * catch up.
+   */
+  SYNCING = 2;
+}
+
 /**
  * The control plane for managing where Screens are served out of.
  * As we go beyond a single host, screen services (mainly the streamer for now)

@@ -13,6 +13,7 @@ var (
 )
 
 func main() {
+	flag.Parse()
 	grpcServer := grpc.NewServer(
 	// grpc.StreamInterceptor(grpc_prometheus.StreamServerInterceptor),
 	// grpc.UnaryInterceptor(grpc_prometheus.UnaryServerInterceptor),
