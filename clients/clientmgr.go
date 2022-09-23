@@ -1,4 +1,4 @@
-package control
+package clients
 
 import (
 	// "github.com/grpc-ecosystem/go-grpc-prometheus"

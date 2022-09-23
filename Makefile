@@ -23,6 +23,10 @@ goprotos:
        --go-grpc_out=$(SLICER_ROOT) --go-grpc_opt=paths=source_relative	\
        --proto_path=$(SLICER_ROOT)                     			\
       $(SLICER_ROOT)/service/control.proto
+	protoc --go_out=$(SLICER_ROOT)/cmd/echosvc/ --go_opt=paths=source_relative          \
+       --go-grpc_out=$(SLICER_ROOT)/cmd/echosvc/ --go-grpc_opt=paths=source_relative	\
+       --proto_path=$(SLICER_ROOT)/cmd/echosvc/                     			\
+      $(SLICER_ROOT)/cmd/echosvc/echosvc.proto
 
 pyprotos:
 	echo "Generating Python bindings"

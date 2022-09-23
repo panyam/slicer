@@ -1,4 +1,4 @@
-package control
+package clients
 
 import (
 	"google.golang.org/grpc"

@@ -1,0 +1,23 @@
+syntax = "proto3";
+option go_package = "github.com/panyam/slicer/cmd/echosvc";
+package protos;
+
+/**
+ * A test service that prepends a prefix to its input and returns it.
+ */
+service EchoService {
+  /**
+   * Returns information about a host as to which shards it (manually) hosts.
+   */
+  rpc Echo(Request) returns (Response) {}
+}
+
+message Request {
+  string prefix = 1;
+  string shard = 2;
+  string input = 3;
+}
+
+message Response {
+  string output = 1;
+}
