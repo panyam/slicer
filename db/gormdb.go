@@ -18,7 +18,7 @@ func New(gormdb *gorm.DB) ControlDB {
 	return &DB{storage: gormdb}
 }
 
-func (ctrldb *DB) GetTargets(addresses ...string) ([]*Target, error) {
+func (ctrldb *DB) GetTargets(withShards bool, addresses ...string) ([]*Target, error) {
 	if len(addresses) == 1 {
 		var out Target
 		result := ctrldb.storage.First(&out, "address = ?", addresses[0])
@@ -78,16 +78,17 @@ func (ctrldb *DB) DeleteTargets(addresses ...string) error {
 	}
 }
 
-func (ctrldb *DB) GetShard(key string) (*[]Shard, error) {
-	var out *[]Shard
+func (ctrldb *DB) GetShard(key string, withTargets bool) (*Shard, error) {
+	var out Shard
 	result := ctrldb.storage.Where("key = ?", key).Find(&out)
 	err := result.Error
-	if err != nil {
+	if err != nil || result.RowsAffected == 0 {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			err = nil
 		}
+		return nil, err
 	}
-	return out, err
+	return &out, err
 }
 
 func (ctrldb *DB) SaveShard(shard *Shard) (err error) {
@@ -100,13 +101,19 @@ func (ctrldb *DB) SaveShard(shard *Shard) (err error) {
 	})
 
 	err = result.Error
+	if err != nil {
+		log.Println("SaveShard RowsAffected: ", err, result.RowsAffected)
+	}
 	if err == nil && result.RowsAffected == 0 {
 		// Must have failed due to versioning
 		result = ctrldb.storage.Model(&Shard{}).Create(shard)
 		err = result.Error
-		log.Println("Shard Save Error: ", err)
+		if err != nil {
+			log.Println("SaveShard Create Error: ", err)
+			err = UpdateFailed
+		}
 	} else {
-		log.Println("Shard Save Error 2: ", err)
+		log.Println("SaveShard Update Error: ", err)
 	}
 	return
 }
@@ -115,8 +122,8 @@ func (ctrldb *DB) DeleteShard(key string) error {
 	return ctrldb.storage.Where("key = ?", key).Delete(&Shard{}).Error
 }
 
-func (ctrldb *DB) GetShardTarget(key string) (*[]ShardTarget, error) {
-	var out *[]ShardTarget
+func (ctrldb *DB) GetShardTargets(key string) ([]*ShardTarget, error) {
+	var out []*ShardTarget
 	result := ctrldb.storage.Where("shard_key = ?", key).Find(&out)
 	err := result.Error
 	if err != nil {
@@ -131,19 +138,26 @@ func (ctrldb *DB) SaveShardTarget(shard_target *ShardTarget) (err error) {
 	shard_target.UpdatedAt = time.Now()
 	db := ctrldb.storage
 
-	q := db.Model(shard_target).Where("key = ? and version = ?", shard_target.ShardKey, shard_target.Version)
+	q := db.Model(shard_target).Where("shard_key = ? and target_address = ? AND version = ?", shard_target.ShardKey, shard_target.TargetAddress, shard_target.Version)
 	result := q.UpdateColumns(map[string]interface{}{
+		"status":  shard_target.Status,
 		"version": shard_target.Version + 1,
 	})
 
 	err = result.Error
+	if err != nil {
+		log.Println("SaveShardTarget Error, RowsAffected", err, result.RowsAffected)
+	}
 	if err == nil && result.RowsAffected == 0 {
 		// Must have failed due to versioning
 		result = ctrldb.storage.Model(&ShardTarget{}).Create(shard_target)
 		err = result.Error
-		log.Println("ShardTarget Save Error: ", err)
+		if err != nil {
+			log.Println("ShardTarget Create Error: ", err)
+			err = UpdateFailed
+		}
 	} else {
-		log.Println("ShardTarget Save Error 2: ", err)
+		log.Println("ShardTarget Update Error: ", err)
 	}
 	return
 }

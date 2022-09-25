@@ -11,7 +11,6 @@ type Shard struct {
 	Version   int       // used for optimistic locking
 	CreatedAt time.Time
 	UpdatedAt time.Time
-	PingedAt  time.Time
 }
 
 type Target struct {

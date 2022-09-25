@@ -8,7 +8,7 @@ var UpdateFailed = errors.New("Update failed concurrency check")
 
 type ControlDB interface {
 	// Get the target by a given address
-	GetTargets(addresses ...string) ([]*Target, error)
+	GetTargets(withShards bool, addresses ...string) ([]*Target, error)
 
 	// Updates/Creates a target
 	SaveTarget(target *Target) error
@@ -17,7 +17,7 @@ type ControlDB interface {
 	DeleteTargets(addresses ...string) error
 
 	// Get all the targets for a given shard.
-	GetShard(shardkey string) (*[]Shard, error)
+	GetShard(shardkey string, withTargets bool) (*Shard, error)
 
 	// Create a new shard
 	SaveShard(shard *Shard) (err error)
@@ -26,7 +26,7 @@ type ControlDB interface {
 	DeleteShard(shardkey string) (err error)
 
 	// Get all the targets for a given shard key.
-	GetShardTarget(shardkey string) (*[]ShardTarget, error)
+	GetShardTargets(shardkey string) ([]*ShardTarget, error)
 
 	// Create a new shard
 	SaveShardTarget(shard *ShardTarget) (err error)
