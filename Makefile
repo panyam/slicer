@@ -57,7 +57,7 @@ pgdb:
 
 runtestdb:
 	mkdir -p $(MAKEFILE_DIR)/pgdata_test
-	docker run --rm --name slicer-pgdb-container -p 5432:5432 -v $(MAKEFILE_DIR)/pgdata_test:/var/lib/postgresql/data slicerpgdb
+	docker run --rm --name slicer-pgdb-container -v ${MAKEFILE_DIR}/pgdata_test:/var/lib/postgresql/data -e POSTGRES_PASSWORD=password -p 5432:5432 slicerpgdb
 
 rundb:
 	mkdir -p $(MAKEFILE_DIR)/pgdata

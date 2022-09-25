@@ -78,15 +78,6 @@ type ClientMgr[T any] interface {
 type ShardController interface {
 }
 
-type ShardState string
-
-const (
-	ShardActive ShardState       = "ACTIVE"
-	ShardActive ShardUnavailable = "UNAVAILABLE"
-	ShardActive ShardLoading     = "LOADING"
-	ShardActive ShardSyncing     = "SYNCING"
-)
-
 type ShardObserver interface {
 	// Fisrt step of a shard observer is to observe where the controller is
 	// so it can communicate with it.  This should always return the

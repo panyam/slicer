@@ -21,7 +21,7 @@ func NewControlService(ctrldb db.ControlDB) (out *ControlService) {
 	return
 }
 
-func (s *ControlService) GetTarget(ctx context.Context, request *GetTargetsRequest) (resp *GetTargetsResponse, err error) {
+func (s *ControlService) GetTargets(ctx context.Context, request *GetTargetsRequest) (resp *GetTargetsResponse, err error) {
 	resp = nil
 	err = nil
 	targets, err := s.ControlDB.GetTargets(request.Address)

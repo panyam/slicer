@@ -3,7 +3,11 @@ package main
 import (
 	"flag"
 	"github.com/gin-gonic/gin"
+	"github.com/panyam/slicer/utils"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/reflect/protoreflect"
+	"net/http"
 )
 
 /**
@@ -22,27 +26,34 @@ func main() {
 	flag.Parse()
 	router := gin.Default()
 
+	// observer := NewObserver()
+	// ctrl := observer.DiscoverContoller()
+
 	// Updating the controller itself
 	router.GET("/control/:prefix/:shard/:input/", func(ctx *gin.Context) {
-		shard := ctx.Param("shard")
-		client := clientmgr.GetClient(shard)
-		response, err := client.Echo(&Request{
-			Prefix: ctx.Param("prefix"),
-			Shard:  shard,
-			Input:  ctx.Param("input"),
-		})
-		sendResponse(response)
+		/*
+			shard := ctx.Param("shard")
+			client := clientmgr.GetClient(shard)
+			response, err := client.Echo(&Request{
+				Prefix: ctx.Param("prefix"),
+				Shard:  shard,
+				Input:  ctx.Param("input"),
+			})
+			sendResponse(response)
+		*/
 	})
 
 	router.GET("/:prefix/:shard/:input/", func(ctx *gin.Context) {
-		shard := ctx.Param("shard")
-		client := clientmgr.Get(shard)
-		response, err := client.Echo(&Request{
-			Prefix: ctx.Param("prefix"),
-			Shard:  shard,
-			Input:  ctx.Param("input"),
-		})
-		sendResponse(response)
+		/*
+			shard := ctx.Param("shard")
+			client := clientmgr.Get(shard)
+			response, err := client.Echo(&Request{
+				Prefix: ctx.Param("prefix"),
+				Shard:  shard,
+				Input:  ctx.Param("input"),
+			})
+			sendResponse(response)
+		*/
 	})
 	router.Run(*addr)
 }
