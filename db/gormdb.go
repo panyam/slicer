@@ -122,6 +122,17 @@ func (ctrldb *DB) DeleteShard(key string) error {
 	return ctrldb.storage.Where("key = ?", key).Delete(&Shard{}).Error
 }
 
+func (ctrldb *DB) GetShardTarget(key string, address string) (*ShardTarget, error) {
+	var out *ShardTarget
+	result := ctrldb.storage.First(&out, "shard_key = ? AND target_address = ?", key, address)
+	err := result.Error
+	if err != nil {
+		return nil, err
+	} else {
+		return out, nil
+	}
+}
+
 func (ctrldb *DB) GetShardTargets(key string) ([]*ShardTarget, error) {
 	var out []*ShardTarget
 	result := ctrldb.storage.Where("shard_key = ?", key).Find(&out)

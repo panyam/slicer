@@ -37,18 +37,21 @@ func NewShardedClientMgr[T any](clientCreator func(grpc.ClientConnInterface) T) 
 }
 
 func (ssm *ShardedClientMgr[T]) GetClient(entityId string) (*RpcClient[T], error) {
-	var err error = nil
-	var shard *Shard
-	// find the shard here!
-	// Here is where the call to the control service is needed with caching,
-	// shard re-assignment checks, load-balancing checks etc
-	address := shard.Targets[0].Address
-	client, ok := ssm.Addr2Client[address]
-	if !ok {
-		client, err = NewRpcClient[T](address, ssm.ClientCreator)
-		if err == nil {
-			ssm.Addr2Client[address] = client
+	return nil, nil
+	/*
+		var err error = nil
+		var shard *Shard
+		// find the shard here!
+		// Here is where the call to the control service is needed with caching,
+		// shard re-assignment checks, load-balancing checks etc
+		address := shard.Targets[0].Address
+		client, ok := ssm.Addr2Client[address]
+		if !ok {
+			client, err = NewRpcClient[T](address, ssm.ClientCreator)
+			if err == nil {
+				ssm.Addr2Client[address] = client
+			}
 		}
-	}
-	return client, err
+		return client, err
+	*/
 }

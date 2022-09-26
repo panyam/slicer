@@ -1,7 +1,7 @@
 syntax = "proto3";
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/field_mask.proto";
-option go_package = "github.com/panyam/slicer/control";
+option go_package = "github.com/panyam/slicer/protos";
 package protos;
 
 enum ShardState {
@@ -33,26 +33,6 @@ enum ShardState {
  * having a single service/endpoint serve this makes things extendible later on.
  */
 service ControlService {
-  /**
-   * Returns information about a host as to which shards it (manually) hosts.
-   */
-  rpc GetTargets(GetTargetsRequest) returns (GetTargetsResponse) {}
-
-  /**
-   * Called to update a target (most likely its status).
-   */
-  rpc SaveTarget(SaveTargetRequest) returns (Target) {}
-
-  /**
-   * Deletes/Removes a target - should also remove all associated shards.
-   */
-  rpc DeleteTargets(DeleteTargetsRequest) returns (DeleteTargetsRequest) {}
-
-  /**
-   * Return all hosts participating in this cluster.
-   */
-  rpc ListTargets(ListTargetsRequest) returns (ListTargetsResponse) {}
-
   // Called by clients tht want to know where to connect to for a particular shard.
   /**
    * Get the source of truth/current snapshot of assignments of a shard key
@@ -70,6 +50,31 @@ service ControlService {
    * Called by admin to delete a shard completely or particular targets for it
    */
   rpc DeleteShard(DeleteShardRequest) returns (DeleteShardResponse) {}
+
+  /**
+   * Returns information about a host as to which shards it (manually) hosts.
+   */
+  rpc GetTargets(GetTargetsRequest) returns (GetTargetsResponse) {}
+
+  /**
+   * Called to ping a target's health status
+   */
+  rpc PingTarget(PingTargetRequest) returns (Target) {}
+
+  /**
+   * Called to update a target (most likely its status).
+   */
+  rpc SaveTarget(SaveTargetRequest) returns (Target) {}
+
+  /**
+   * Deletes/Removes a target - should also remove all associated shards.
+   */
+  rpc DeleteTargets(DeleteTargetsRequest) returns (DeleteTargetsResponse) {}
+
+  /**
+   * Return all hosts participating in this cluster.
+   */
+  rpc ListTargets(ListTargetsRequest) returns (ListTargetsResponse) {}
 
   /**
    * Shard clients (those who need to reach to a particular host that serves a shard)
@@ -106,17 +111,20 @@ message ListTargetsResponse {
   repeated Target hosts = 1;
 }
 
+message PingTargetRequest {
+  string address = 1;
+}
+
 message SaveTargetRequest {
   Target target = 1;
   google.protobuf.FieldMask update_mask = 2;
 }
 
 message DeleteTargetsRequest {
-  string address = 1;
+  repeated string addresses = 1;
 }
 
 message DeleteTargetsResponse {
-  repeated Target targets = 1;
 }
 
 /**
@@ -131,17 +139,28 @@ message GetShardRequest {
 }
 
 message GetShardResponse {
-  Shard shard = 1;
+  ShardKey key = 1;
+  repeated ShardTarget targets = 2;
+  map<string, Target> target_info = 3;
 }
 
 message Shard {
   ShardKey key = 1;
-  repeated Target targets = 2;
+  repeated ShardTarget targets = 2;
+}
+
+message ShardTarget {
+  google.protobuf.Timestamp created_at = 1;
+  google.protobuf.Timestamp updated_at = 2;
+  string target = 4;
+  string status = 5;
 }
 
 message SaveShardRequest {
-  Shard shard = 1;
-  google.protobuf.FieldMask update_mask = 2;
+  ShardKey key = 1;
+  repeated string added = 2;
+  repeated string removed = 3;
+  bool remove_all = 4;
 }
 
 message SaveShardResponse {

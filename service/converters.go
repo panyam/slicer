@@ -1,35 +1,34 @@
-package control
+package service
 
 import (
-	gut "github.com/panyam/goutils/utils"
+	// gut "github.com/panyam/goutils/utils"
 	"github.com/panyam/slicer/db"
+	"github.com/panyam/slicer/protos"
 	tspb "google.golang.org/protobuf/types/known/timestamppb"
 )
 
-/*
-func ShardToProto(input *db.Shard) (out *Shard) {
-	targets := gut.Map(input.Targets, TargetToProto)
-	out = &Shard{
+func ShardTargetToProto(input *db.ShardTarget) (out *protos.ShardTarget) {
+	out = &protos.ShardTarget{
+		Status:    input.Status,
 		UpdatedAt: tspb.New(input.UpdatedAt),
-		Key:       &ShardKey{Key: input.Key},
-		Targets:   targets,
+		CreatedAt: tspb.New(input.CreatedAt),
+		Target:    input.TargetAddress,
 	}
 	return
 }
 
-func ShardFromProto(input *Shard) (out *db.Shard) {
-	targets := gut.Map(input.Targets, TargetFromProto)
-	out = &Shard{
-		Key:       input.Key.Key,
-		UpdatedAt: input.UpdatedAt.AsTime(),
-		Targets:   targets,
+func ShardTargetFromProto(input *protos.ShardTarget) (out *db.ShardTarget) {
+	out = &db.ShardTarget{
+		TargetAddress: input.Target,
+		Status:        input.Status,
+		UpdatedAt:     input.UpdatedAt.AsTime(),
+		CreatedAt:     input.CreatedAt.AsTime(),
 	}
 	return
 }
-*/
 
-func TargetToProto(input *db.Target) (out *Target) {
-	out = &Target{
+func TargetToProto(input *db.Target) (out *protos.Target) {
+	out = &protos.Target{
 		Address:   input.Address,
 		Status:    input.Status,
 		UpdatedAt: tspb.New(input.UpdatedAt),
@@ -37,7 +36,7 @@ func TargetToProto(input *db.Target) (out *Target) {
 	return
 }
 
-func TargetFromProto(input *Target) (out *db.Target) {
+func TargetFromProto(input *protos.Target) (out *db.Target) {
 	out = &db.Target{
 		Address:   input.Address,
 		Status:    input.Status,

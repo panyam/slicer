@@ -1,8 +1,7 @@
 package clients
 
 import (
-	// "github.com/grpc-ecosystem/go-grpc-prometheus"
-	"github.com/panyam/slicer/service"
+	// "github.com/panyam/slicer/service"
 	"google.golang.org/grpc"
 	"log"
 )
@@ -74,6 +73,7 @@ type ClientMgr[T any] interface {
 	GetClient(entityId string) (*RpcClient[T], error)
 }
 
+/*
 // This is the ControlService proto
 type ShardController interface {
 }
@@ -99,3 +99,4 @@ type ShardClient interface {
 	// Notifies of shard assignment changes
 	ShardsChanged(shardkey ...string)
 }
+*/

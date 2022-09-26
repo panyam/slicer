@@ -1,12 +1,17 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"github.com/gin-gonic/gin"
+	"github.com/panyam/slicer/clients"
+	"github.com/panyam/slicer/cmd/echosvc"
+	"github.com/panyam/slicer/protos"
 	"github.com/panyam/slicer/utils"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/reflect/protoreflect"
+	"log"
 	"net/http"
 )
 
@@ -19,44 +24,9 @@ import (
  */
 
 var (
-	addr = flag.String("addr", "localhost:8000", "Address to run the echo web proxy client on.")
+	addr         = flag.String("addr", "localhost:8000", "Address to run the echo web proxy client on.")
+	control_addr = flag.String("control_addr", "localhost:7000", "Address where control service is running.")
 )
-
-func main() {
-	flag.Parse()
-	router := gin.Default()
-
-	// observer := NewObserver()
-	// ctrl := observer.DiscoverContoller()
-
-	// Updating the controller itself
-	router.GET("/control/:prefix/:shard/:input/", func(ctx *gin.Context) {
-		/*
-			shard := ctx.Param("shard")
-			client := clientmgr.GetClient(shard)
-			response, err := client.Echo(&Request{
-				Prefix: ctx.Param("prefix"),
-				Shard:  shard,
-				Input:  ctx.Param("input"),
-			})
-			sendResponse(response)
-		*/
-	})
-
-	router.GET("/:prefix/:shard/:input/", func(ctx *gin.Context) {
-		/*
-			shard := ctx.Param("shard")
-			client := clientmgr.Get(shard)
-			response, err := client.Echo(&Request{
-				Prefix: ctx.Param("prefix"),
-				Shard:  shard,
-				Input:  ctx.Param("input"),
-			})
-			sendResponse(response)
-		*/
-	})
-	router.Run(*addr)
-}
 
 func sendResponse(ctx *gin.Context, resp protoreflect.ProtoMessage, err error) {
 	if err != nil {
@@ -80,4 +50,72 @@ func sendResponse(ctx *gin.Context, resp protoreflect.ProtoMessage, err error) {
 		jsonData := utils.ProtoToJson(resp)
 		ctx.Data(http.StatusOK, gin.MIMEJSON, jsonData)
 	}
+}
+
+func main() {
+	flag.Parse()
+	router := gin.Default()
+
+	// observer := NewObserver()
+	// ctrl := observer.DiscoverContoller()
+
+	// Updating the controller itself
+	router.GET("/control/:prefix/:shard/:input/", func(ctx *gin.Context) {
+		/*
+			shard := ctx.Param("shard")
+			client := clientmgr.GetClient(shard)
+			response, err := client.Echo(&Request{
+				Prefix: ctx.Param("prefix"),
+				Shard:  shard,
+				Input:  ctx.Param("input"),
+			})
+			sendResponse(response)
+		*/
+	})
+
+	// This would be replaced by the discovery service otherwise so that
+	// every node would have the "latest" client
+	clientMgr := clients.NewStaticClientMgr(*control_addr, protos.NewControlServiceClient)
+	ctrlSvcClient, err := clientMgr.GetClient("")
+	log.Println("CC, E: ", ctrlSvcClient, err)
+	if err != nil {
+		panic(err)
+	}
+	clientMap := make(map[string]*clients.RpcClient[echosvc.EchoServiceClient])
+
+	router.GET("/:prefix/:shard/:input/", func(ctx *gin.Context) {
+		shard := ctx.Param("shard")
+		client, ok := clientMap[shard]
+		if !ok {
+			resp, err := ctrlSvcClient.Client.GetShard(
+				context.Background(),
+				&protos.GetShardRequest{
+					Shard: &protos.ShardKey{Key: shard},
+				},
+			)
+			if err != nil {
+				sendResponse(ctx, nil, err)
+				return
+			}
+
+			// our resp has a bunch of addresses - see if we have those here
+			// create a client against this shard's address
+			address := resp.Targets[0].Target
+			newClient, err := clients.NewRpcClient(address, echosvc.NewEchoServiceClient)
+			if err != nil {
+				sendResponse(ctx, nil, err)
+				return
+			}
+			clientMap[shard] = newClient
+			client = newClient
+		}
+
+		response, err := client.Client.Echo(context.Background(), &echosvc.Request{
+			Prefix: ctx.Param("prefix"),
+			Shard:  shard,
+			Input:  ctx.Param("input"),
+		})
+		sendResponse(ctx, response, err)
+	})
+	router.Run(*addr)
 }

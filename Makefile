@@ -7,7 +7,7 @@ PATH:=$(PATH):$(GOROOT):$(GOPATH):$(GOBIN)
 MAKEFILE_DIR:=$(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 SLICER_ROOT=$(MAKEFILE_DIR)
 # Generate the python client too
-PY_OUT_DIR=$(SLICER_ROOT)/service/$(PYPKGNAME)
+PY_OUT_DIR=$(SLICER_ROOT)/protos/$(PYPKGNAME)
 
 
 all: protos
@@ -22,7 +22,7 @@ goprotos:
 	protoc --go_out=$(SLICER_ROOT) --go_opt=paths=source_relative          \
        --go-grpc_out=$(SLICER_ROOT) --go-grpc_opt=paths=source_relative	\
        --proto_path=$(SLICER_ROOT)                     			\
-      $(SLICER_ROOT)/service/control.proto
+      $(SLICER_ROOT)/protos/control.proto
 	protoc --go_out=$(SLICER_ROOT)/cmd/echosvc/ --go_opt=paths=source_relative          \
        --go-grpc_out=$(SLICER_ROOT)/cmd/echosvc/ --go-grpc_opt=paths=source_relative	\
        --proto_path=$(SLICER_ROOT)/cmd/echosvc/                     			\
@@ -35,8 +35,8 @@ pyprotos:
       --python_out="$(PY_OUT_DIR)"          \
       --grpc_python_out="$(PY_OUT_DIR)"     \
       --proto_path=$(SLICER_ROOT)           \
-      $(SLICER_ROOT)/service/control.proto
-	@mv $(PY_OUT_DIR)/service/*.py $(SLICER_ROOT)/$(PYPKGNAME)
+      $(SLICER_ROOT)/protos/control.proto
+	@mv $(PY_OUT_DIR)/protos/*.py $(SLICER_ROOT)/$(PYPKGNAME)
 	@echo "Cleaning up files..."
 	rm -Rf $(PY_OUT_DIR)
 

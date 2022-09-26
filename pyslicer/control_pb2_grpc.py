@@ -2,7 +2,7 @@
 """Client and server classes corresponding to protobuf-defined services."""
 import grpc
 
-from service import control_pb2 as service_dot_control__pb2
+from protos import control_pb2 as protos_dot_control__pb2
 
 
 class ControlServiceStub(object):
@@ -12,6 +12,7 @@ class ControlServiceStub(object):
     will be served from different shards and a single way to manage this is needed.
     Whether the SoT for shard info/discovery/records is distributed or centralized
     having a single service/endpoint serve this makes things extendible later on.
+    Called by clients tht want to know where to connect to for a particular shard.
     """
 
     def __init__(self, channel):
@@ -20,45 +21,50 @@ class ControlServiceStub(object):
         Args:
             channel: A grpc.Channel.
         """
-        self.GetTargets = channel.unary_unary(
-                '/protos.ControlService/GetTargets',
-                request_serializer=service_dot_control__pb2.GetTargetsRequest.SerializeToString,
-                response_deserializer=service_dot_control__pb2.GetTargetsResponse.FromString,
-                )
-        self.SaveTarget = channel.unary_unary(
-                '/protos.ControlService/SaveTarget',
-                request_serializer=service_dot_control__pb2.SaveTargetRequest.SerializeToString,
-                response_deserializer=service_dot_control__pb2.Target.FromString,
-                )
-        self.DeleteTargets = channel.unary_unary(
-                '/protos.ControlService/DeleteTargets',
-                request_serializer=service_dot_control__pb2.DeleteTargetsRequest.SerializeToString,
-                response_deserializer=service_dot_control__pb2.DeleteTargetsRequest.FromString,
-                )
-        self.ListTargets = channel.unary_unary(
-                '/protos.ControlService/ListTargets',
-                request_serializer=service_dot_control__pb2.ListTargetsRequest.SerializeToString,
-                response_deserializer=service_dot_control__pb2.ListTargetsResponse.FromString,
-                )
         self.GetShard = channel.unary_unary(
                 '/protos.ControlService/GetShard',
-                request_serializer=service_dot_control__pb2.GetShardRequest.SerializeToString,
-                response_deserializer=service_dot_control__pb2.GetShardResponse.FromString,
+                request_serializer=protos_dot_control__pb2.GetShardRequest.SerializeToString,
+                response_deserializer=protos_dot_control__pb2.GetShardResponse.FromString,
                 )
         self.SaveShard = channel.unary_unary(
                 '/protos.ControlService/SaveShard',
-                request_serializer=service_dot_control__pb2.SaveShardRequest.SerializeToString,
-                response_deserializer=service_dot_control__pb2.SaveShardResponse.FromString,
+                request_serializer=protos_dot_control__pb2.SaveShardRequest.SerializeToString,
+                response_deserializer=protos_dot_control__pb2.SaveShardResponse.FromString,
                 )
         self.DeleteShard = channel.unary_unary(
                 '/protos.ControlService/DeleteShard',
-                request_serializer=service_dot_control__pb2.DeleteShardRequest.SerializeToString,
-                response_deserializer=service_dot_control__pb2.DeleteShardResponse.FromString,
+                request_serializer=protos_dot_control__pb2.DeleteShardRequest.SerializeToString,
+                response_deserializer=protos_dot_control__pb2.DeleteShardResponse.FromString,
+                )
+        self.GetTargets = channel.unary_unary(
+                '/protos.ControlService/GetTargets',
+                request_serializer=protos_dot_control__pb2.GetTargetsRequest.SerializeToString,
+                response_deserializer=protos_dot_control__pb2.GetTargetsResponse.FromString,
+                )
+        self.PingTarget = channel.unary_unary(
+                '/protos.ControlService/PingTarget',
+                request_serializer=protos_dot_control__pb2.PingTargetRequest.SerializeToString,
+                response_deserializer=protos_dot_control__pb2.Target.FromString,
+                )
+        self.SaveTarget = channel.unary_unary(
+                '/protos.ControlService/SaveTarget',
+                request_serializer=protos_dot_control__pb2.SaveTargetRequest.SerializeToString,
+                response_deserializer=protos_dot_control__pb2.Target.FromString,
+                )
+        self.DeleteTargets = channel.unary_unary(
+                '/protos.ControlService/DeleteTargets',
+                request_serializer=protos_dot_control__pb2.DeleteTargetsRequest.SerializeToString,
+                response_deserializer=protos_dot_control__pb2.DeleteTargetsResponse.FromString,
+                )
+        self.ListTargets = channel.unary_unary(
+                '/protos.ControlService/ListTargets',
+                request_serializer=protos_dot_control__pb2.ListTargetsRequest.SerializeToString,
+                response_deserializer=protos_dot_control__pb2.ListTargetsResponse.FromString,
                 )
         self.Connect = channel.stream_stream(
                 '/protos.ControlService/Connect',
-                request_serializer=service_dot_control__pb2.ControlRequest.SerializeToString,
-                response_deserializer=service_dot_control__pb2.ControlMessage.FromString,
+                request_serializer=protos_dot_control__pb2.ControlRequest.SerializeToString,
+                response_deserializer=protos_dot_control__pb2.ControlMessage.FromString,
                 )
 
 
@@ -69,11 +75,46 @@ class ControlServiceServicer(object):
     will be served from different shards and a single way to manage this is needed.
     Whether the SoT for shard info/discovery/records is distributed or centralized
     having a single service/endpoint serve this makes things extendible later on.
+    Called by clients tht want to know where to connect to for a particular shard.
     """
+
+    def GetShard(self, request, context):
+        """*
+        Get the source of truth/current snapshot of assignments of a shard key
+        to a set of handler addresses
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def SaveShard(self, request, context):
+        """*
+        Called by what ever is interested in notifying the controller of
+        updates to membership.
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def DeleteShard(self, request, context):
+        """*
+        Called by admin to delete a shard completely or particular targets for it
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
 
     def GetTargets(self, request, context):
         """*
         Returns information about a host as to which shards it (manually) hosts.
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def PingTarget(self, request, context):
+        """*
+        Called to ping a target's health status
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -103,34 +144,6 @@ class ControlServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def GetShard(self, request, context):
-        """Called by clients tht want to know where to connect to for a particular shard.
-
-        *
-        Get the source of truth/current snapshot of assignments of a shard key
-        to a set of handler addresses
-        """
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
-
-    def SaveShard(self, request, context):
-        """*
-        Called by what ever is interested in notifying the controller of
-        updates to membership.
-        """
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
-
-    def DeleteShard(self, request, context):
-        """*
-        Called by admin to delete a shard completely or particular targets for it
-        """
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
-
     def Connect(self, request_iterator, context):
         """*
         Shard clients (those who need to reach to a particular host that serves a shard)
@@ -145,45 +158,50 @@ class ControlServiceServicer(object):
 
 def add_ControlServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
-            'GetTargets': grpc.unary_unary_rpc_method_handler(
-                    servicer.GetTargets,
-                    request_deserializer=service_dot_control__pb2.GetTargetsRequest.FromString,
-                    response_serializer=service_dot_control__pb2.GetTargetsResponse.SerializeToString,
-            ),
-            'SaveTarget': grpc.unary_unary_rpc_method_handler(
-                    servicer.SaveTarget,
-                    request_deserializer=service_dot_control__pb2.SaveTargetRequest.FromString,
-                    response_serializer=service_dot_control__pb2.Target.SerializeToString,
-            ),
-            'DeleteTargets': grpc.unary_unary_rpc_method_handler(
-                    servicer.DeleteTargets,
-                    request_deserializer=service_dot_control__pb2.DeleteTargetsRequest.FromString,
-                    response_serializer=service_dot_control__pb2.DeleteTargetsRequest.SerializeToString,
-            ),
-            'ListTargets': grpc.unary_unary_rpc_method_handler(
-                    servicer.ListTargets,
-                    request_deserializer=service_dot_control__pb2.ListTargetsRequest.FromString,
-                    response_serializer=service_dot_control__pb2.ListTargetsResponse.SerializeToString,
-            ),
             'GetShard': grpc.unary_unary_rpc_method_handler(
                     servicer.GetShard,
-                    request_deserializer=service_dot_control__pb2.GetShardRequest.FromString,
-                    response_serializer=service_dot_control__pb2.GetShardResponse.SerializeToString,
+                    request_deserializer=protos_dot_control__pb2.GetShardRequest.FromString,
+                    response_serializer=protos_dot_control__pb2.GetShardResponse.SerializeToString,
             ),
             'SaveShard': grpc.unary_unary_rpc_method_handler(
                     servicer.SaveShard,
-                    request_deserializer=service_dot_control__pb2.SaveShardRequest.FromString,
-                    response_serializer=service_dot_control__pb2.SaveShardResponse.SerializeToString,
+                    request_deserializer=protos_dot_control__pb2.SaveShardRequest.FromString,
+                    response_serializer=protos_dot_control__pb2.SaveShardResponse.SerializeToString,
             ),
             'DeleteShard': grpc.unary_unary_rpc_method_handler(
                     servicer.DeleteShard,
-                    request_deserializer=service_dot_control__pb2.DeleteShardRequest.FromString,
-                    response_serializer=service_dot_control__pb2.DeleteShardResponse.SerializeToString,
+                    request_deserializer=protos_dot_control__pb2.DeleteShardRequest.FromString,
+                    response_serializer=protos_dot_control__pb2.DeleteShardResponse.SerializeToString,
+            ),
+            'GetTargets': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetTargets,
+                    request_deserializer=protos_dot_control__pb2.GetTargetsRequest.FromString,
+                    response_serializer=protos_dot_control__pb2.GetTargetsResponse.SerializeToString,
+            ),
+            'PingTarget': grpc.unary_unary_rpc_method_handler(
+                    servicer.PingTarget,
+                    request_deserializer=protos_dot_control__pb2.PingTargetRequest.FromString,
+                    response_serializer=protos_dot_control__pb2.Target.SerializeToString,
+            ),
+            'SaveTarget': grpc.unary_unary_rpc_method_handler(
+                    servicer.SaveTarget,
+                    request_deserializer=protos_dot_control__pb2.SaveTargetRequest.FromString,
+                    response_serializer=protos_dot_control__pb2.Target.SerializeToString,
+            ),
+            'DeleteTargets': grpc.unary_unary_rpc_method_handler(
+                    servicer.DeleteTargets,
+                    request_deserializer=protos_dot_control__pb2.DeleteTargetsRequest.FromString,
+                    response_serializer=protos_dot_control__pb2.DeleteTargetsResponse.SerializeToString,
+            ),
+            'ListTargets': grpc.unary_unary_rpc_method_handler(
+                    servicer.ListTargets,
+                    request_deserializer=protos_dot_control__pb2.ListTargetsRequest.FromString,
+                    response_serializer=protos_dot_control__pb2.ListTargetsResponse.SerializeToString,
             ),
             'Connect': grpc.stream_stream_rpc_method_handler(
                     servicer.Connect,
-                    request_deserializer=service_dot_control__pb2.ControlRequest.FromString,
-                    response_serializer=service_dot_control__pb2.ControlMessage.SerializeToString,
+                    request_deserializer=protos_dot_control__pb2.ControlRequest.FromString,
+                    response_serializer=protos_dot_control__pb2.ControlMessage.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -199,75 +217,8 @@ class ControlService(object):
     will be served from different shards and a single way to manage this is needed.
     Whether the SoT for shard info/discovery/records is distributed or centralized
     having a single service/endpoint serve this makes things extendible later on.
+    Called by clients tht want to know where to connect to for a particular shard.
     """
-
-    @staticmethod
-    def GetTargets(request,
-            target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/protos.ControlService/GetTargets',
-            service_dot_control__pb2.GetTargetsRequest.SerializeToString,
-            service_dot_control__pb2.GetTargetsResponse.FromString,
-            options, channel_credentials,
-            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
-
-    @staticmethod
-    def SaveTarget(request,
-            target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/protos.ControlService/SaveTarget',
-            service_dot_control__pb2.SaveTargetRequest.SerializeToString,
-            service_dot_control__pb2.Target.FromString,
-            options, channel_credentials,
-            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
-
-    @staticmethod
-    def DeleteTargets(request,
-            target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/protos.ControlService/DeleteTargets',
-            service_dot_control__pb2.DeleteTargetsRequest.SerializeToString,
-            service_dot_control__pb2.DeleteTargetsRequest.FromString,
-            options, channel_credentials,
-            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
-
-    @staticmethod
-    def ListTargets(request,
-            target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/protos.ControlService/ListTargets',
-            service_dot_control__pb2.ListTargetsRequest.SerializeToString,
-            service_dot_control__pb2.ListTargetsResponse.FromString,
-            options, channel_credentials,
-            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
     @staticmethod
     def GetShard(request,
@@ -281,8 +232,8 @@ class ControlService(object):
             timeout=None,
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/protos.ControlService/GetShard',
-            service_dot_control__pb2.GetShardRequest.SerializeToString,
-            service_dot_control__pb2.GetShardResponse.FromString,
+            protos_dot_control__pb2.GetShardRequest.SerializeToString,
+            protos_dot_control__pb2.GetShardResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
@@ -298,8 +249,8 @@ class ControlService(object):
             timeout=None,
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/protos.ControlService/SaveShard',
-            service_dot_control__pb2.SaveShardRequest.SerializeToString,
-            service_dot_control__pb2.SaveShardResponse.FromString,
+            protos_dot_control__pb2.SaveShardRequest.SerializeToString,
+            protos_dot_control__pb2.SaveShardResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
@@ -315,8 +266,93 @@ class ControlService(object):
             timeout=None,
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/protos.ControlService/DeleteShard',
-            service_dot_control__pb2.DeleteShardRequest.SerializeToString,
-            service_dot_control__pb2.DeleteShardResponse.FromString,
+            protos_dot_control__pb2.DeleteShardRequest.SerializeToString,
+            protos_dot_control__pb2.DeleteShardResponse.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def GetTargets(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/protos.ControlService/GetTargets',
+            protos_dot_control__pb2.GetTargetsRequest.SerializeToString,
+            protos_dot_control__pb2.GetTargetsResponse.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def PingTarget(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/protos.ControlService/PingTarget',
+            protos_dot_control__pb2.PingTargetRequest.SerializeToString,
+            protos_dot_control__pb2.Target.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def SaveTarget(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/protos.ControlService/SaveTarget',
+            protos_dot_control__pb2.SaveTargetRequest.SerializeToString,
+            protos_dot_control__pb2.Target.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def DeleteTargets(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/protos.ControlService/DeleteTargets',
+            protos_dot_control__pb2.DeleteTargetsRequest.SerializeToString,
+            protos_dot_control__pb2.DeleteTargetsResponse.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def ListTargets(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/protos.ControlService/ListTargets',
+            protos_dot_control__pb2.ListTargetsRequest.SerializeToString,
+            protos_dot_control__pb2.ListTargetsResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
@@ -332,7 +368,7 @@ class ControlService(object):
             timeout=None,
             metadata=None):
         return grpc.experimental.stream_stream(request_iterator, target, '/protos.ControlService/Connect',
-            service_dot_control__pb2.ControlRequest.SerializeToString,
-            service_dot_control__pb2.ControlMessage.FromString,
+            protos_dot_control__pb2.ControlRequest.SerializeToString,
+            protos_dot_control__pb2.ControlMessage.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

@@ -26,11 +26,12 @@ type ControlDB interface {
 	DeleteShard(shardkey string) (err error)
 
 	// Get all the targets for a given shard key.
+	GetShardTarget(shardkey string, address string) (*ShardTarget, error)
 	GetShardTargets(shardkey string) ([]*ShardTarget, error)
 
 	// Create a new shard
 	SaveShardTarget(shard *ShardTarget) (err error)
 
-	// For a given shardkey remove all or particular shard assignments
+	// For a given shardkey add or remove all or particular shard assignments
 	DeleteShardTargets(shardkey string, targets ...string) (err error)
 }
