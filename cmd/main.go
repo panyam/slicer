@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	gut "github.com/panyam/goutils/utils"
+	"github.com/panyam/slicer/cmd/harness"
 	"log"
 	"os"
 	"regexp"
@@ -26,9 +27,9 @@ func main() {
 	}
 	defer logfile.Close()
 
-	var ctrl *Controller
-	clients := make(map[string]*WebClient)
-	producers := make(map[string]*Producer)
+	var ctrl *harness.Controller
+	clients := make(map[string]*harness.WebClient)
+	producers := make(map[string]*harness.Producer)
 
 	reader := bufio.NewReader(os.Stdin)
 	spacesRe := regexp.MustCompile("\\s+")
@@ -37,8 +38,8 @@ func main() {
 		if ctrl != nil {
 			log.Println("Controller already running.")
 		} else {
-			ctrl = NewController(*control_addr, *db_endpoint, logfile)
-			ctrl.Start()
+			ctrl = harness.NewController(*control_addr, *db_endpoint, logfile)
+			go ctrl.Start()
 		}
 	}
 	stopController := func() {
@@ -54,8 +55,8 @@ func main() {
 		if _, ok := clients[addr]; ok {
 			log.Println("Client already running: ", addr)
 		} else {
-			clients[addr] = NewWebClient(addr, logfile)
-			clients[addr].Start()
+			clients[addr] = harness.NewWebClient(addr, logfile)
+			go clients[addr].Start()
 		}
 	}
 	stopClient := func(addr string) {
@@ -65,8 +66,8 @@ func main() {
 		if _, ok := producers[addr]; ok {
 			log.Println("Producer already running: ", addr)
 		} else {
-			producers[addr] = NewProducer(prefix, addr, *control_addr, logfile)
-			producers[addr].Start()
+			producers[addr] = harness.NewProducer(prefix, addr, *control_addr, logfile)
+			go producers[addr].Start()
 		}
 	}
 	stopProducer := func(addr string) {
@@ -78,10 +79,12 @@ func main() {
 		if err != nil {
 			log.Println("Read Error: ", err)
 		} else {
-			log.Println("REad: ", line, err)
 			parts := spacesRe.Split(line, -1)
 			parts = gut.Map(parts, func(s string) string { return strings.Trim(s, " ") })
 			parts = gut.Filter(parts, func(s string) bool { return len(s) > 0 })
+			if len(parts) < 2 {
+				continue
+			}
 			log.Println("Parts: ", parts)
 			if parts[0] == "ctrl" {
 				if parts[1] == "start" {
