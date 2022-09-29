@@ -11,6 +11,8 @@ require (
 	gorm.io/gorm v1.23.8
 )
 
+replace github.com/panyam/goutils v0.0.22 => ../../golang/goutils/
+
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/gin-contrib/sse v0.1.0 // indirect

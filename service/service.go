@@ -8,6 +8,8 @@ import (
 	"github.com/panyam/slicer/protos"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"sort"
+	"time"
 )
 
 type ControlService struct {
@@ -38,11 +40,23 @@ func (s *ControlService) GetTargets(ctx context.Context, request *protos.GetTarg
 }
 
 func (s *ControlService) PingTarget(ctx context.Context, request *protos.PingTargetRequest) (resp *protos.Target, err error) {
-	targets, err := s.ControlDB.GetTargets(request.Address)
-	if err != nil {
-		err = s.ControlDB.SaveTarget(targets[0])
-		if err != nil {
-			resp = TargetToProto(target[0])
+	targets, err := s.ControlDB.GetTargets(false, request.Address)
+	if err == nil {
+		if len(targets) == 0 {
+			// create it
+			newtarget := &db.Target{
+				Address:  request.Address,
+				PingedAt: time.Now(),
+				Status:   "ACTIVE",
+			}
+			if err = s.ControlDB.SaveTarget(newtarget); err == nil {
+				resp = TargetToProto(newtarget)
+			}
+		} else {
+			targets[0].PingedAt = time.Now()
+			if err = s.ControlDB.SaveTarget(targets[0]); err == nil {
+				resp = TargetToProto(targets[0])
+			}
 		}
 	}
 	return resp, err
@@ -72,14 +86,17 @@ func (s *ControlService) GetShard(ctx context.Context, request *protos.GetShardR
 		addresses := gut.Map(shard_targets, func(st *db.ShardTarget) string {
 			return st.TargetAddress
 		})
-		targets, err2 := s.ControlDB.GetTargets(false, addresses...)
-		if err2 != nil {
-			err = err2
-		} else {
+		var targets []*db.Target
+		targets, err = s.ControlDB.GetTargets(false, addresses...)
+		if err == nil {
 			target_info := make(map[string]*protos.Target)
 			for _, target := range targets {
 				target_info[target.Address] = TargetToProto(target)
 			}
+			// Order Shard targets by most recently pinged
+			sort.Slice(shard_targets, func(t1 int, t2 int) bool {
+				return targets[t2].PingedAt.Sub(targets[t1].PingedAt) < 0
+			})
 			resp = &protos.GetShardResponse{
 				Key:        &protos.ShardKey{Key: request.Shard.Key},
 				Targets:    gut.Map(shard_targets, ShardTargetToProto),
