@@ -38,7 +38,7 @@ func NewProducer(prefix string, addr string, control_addr string, logfile io.Wri
 func (p *Producer) Start() {
 	clientMgr := clients.NewStaticClientMgr(p.ControlAddr, protos.NewControlServiceClient)
 	ctrlSvcClient, err := clientMgr.GetClient("")
-	log.Println("CC, E: ", ctrlSvcClient, err)
+	p.Logger.Println("CC, E: ", ctrlSvcClient, err)
 	if err != nil {
 		panic(err)
 	}
@@ -56,7 +56,7 @@ func (p *Producer) Start() {
 
 	echosvc.RegisterEchoServiceServer(p.grpcServer, echosvc.NewEchoService(p.Prefix))
 	// grpc_prometheus.Register(grpcServer)
-	log.Printf("Initializing Echo Server on %s", p.Addr)
+	p.Logger.Printf("Initializing Echo Server on %s", p.Addr)
 	lis, err := net.Listen("tcp", p.Addr)
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)

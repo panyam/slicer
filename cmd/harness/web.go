@@ -16,7 +16,7 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"os/signal"
+	// "os/signal"
 	"sync"
 	"syscall"
 	"time"
@@ -46,6 +46,7 @@ func NewWebClient(addr string, logfile io.Writer) *WebClient {
 		Router:      gin.Default(),
 		Logger:      log.New(logfile, fmt.Sprintf("CLNT:[%s]", addr), log.Ldate|log.Ltime|log.Lshortfile),
 	}
+	out.Router.Use(gin.LoggerWithWriter(logfile))
 	return &out
 }
 
@@ -72,7 +73,7 @@ func (w *WebClient) Start() {
 	// every node would have the "latest" client
 	clientMgr := clients.NewStaticClientMgr(w.ControlAddr, protos.NewControlServiceClient)
 	ctrlSvcClient, err := clientMgr.GetClient("")
-	log.Println("CC, E: ", ctrlSvcClient, err)
+	w.Logger.Println("CC, E: ", ctrlSvcClient, err)
 	if err != nil {
 		panic(err)
 	}
@@ -122,7 +123,7 @@ func (w *WebClient) Start() {
 	go func() {
 		defer w.wg.Done()
 		if err := srv.ListenAndServe(); err != nil && errors.Is(err, http.ErrServerClosed) {
-			log.Printf("WebClient (%s) Listen: %s\n", w.Addr, err)
+			w.Logger.Printf("WebClient (%s) Listen: %s\n", w.Addr, err)
 		}
 	}()
 
@@ -135,9 +136,9 @@ func (w *WebClient) Start() {
 		// kill (no param) default send syscall.SIGTERM
 		// kill -2 is syscall.SIGINT
 		// kill -9 is syscall.SIGKILL but can't be caught, so don't need to add it
-		signal.Notify(w.quitChan, syscall.SIGINT, syscall.SIGTERM)
+		// signal.Notify(w.quitChan, syscall.SIGINT, syscall.SIGTERM)
 		<-w.quitChan
-		log.Printf("Shutting down web client: %s", w.Addr)
+		w.Logger.Printf("Shutting down web client: %s", w.Addr)
 
 		// The context is used to inform the server it has 5 seconds to finish
 		// the request it is currently handling
@@ -145,7 +146,7 @@ func (w *WebClient) Start() {
 		defer cancel()
 
 		if err := srv.Shutdown(ctx); err != nil {
-			log.Println(fmt.Sprintf("Server (%s) forced to shutdown: ", w.Addr), err)
+			w.Logger.Println(fmt.Sprintf("Server (%s) forced to shutdown: ", w.Addr), err)
 		}
 	}()
 }

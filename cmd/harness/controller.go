@@ -49,7 +49,7 @@ func (c *Controller) Stop() {
 
 func (c *Controller) Start() {
 	protos.RegisterControlServiceServer(c.grpcServer, service.NewControlService(c.ctrldb))
-	log.Printf("Initializing Control Server on %s", c.Addr)
+	c.Logger.Printf("Initializing Control Server on %s", c.Addr)
 	lis, err := net.Listen("tcp", c.Addr)
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
@@ -65,6 +65,8 @@ func OpenDB(db_endpoint string) (db *gorm.DB, err error) {
 	} else if strings.HasPrefix(db_endpoint, "postgres://") {
 		db, err = gorm.Open(postgres.Open(db_endpoint), &gorm.Config{})
 	}
-	log.Printf("Cannot connect DB: %s", db_endpoint)
+	if err != nil {
+		log.Printf("Cannot connect DB: %s", db_endpoint)
+	}
 	return
 }

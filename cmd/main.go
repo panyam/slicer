@@ -60,6 +60,12 @@ func main() {
 		}
 	}
 	stopClient := func(addr string) {
+		if _, ok := clients[addr]; !ok {
+			log.Println("Client already stopped: ", addr)
+		} else {
+			delete(clients, addr)
+			clients[addr].Stop()
+		}
 	}
 
 	startProducer := func(addr string, prefix string) {
@@ -71,6 +77,20 @@ func main() {
 		}
 	}
 	stopProducer := func(addr string) {
+		if _, ok := producers[addr]; !ok {
+			log.Println("Producer already stopped: ", addr)
+		} else {
+			delete(producers, addr)
+			producers[addr].Stop()
+		}
+	}
+
+	showHelp := func() {
+		log.Println("Usage: ")
+		log.Println("ctrl start|stop")
+		log.Println("prod start|stop host:addr")
+		log.Println("client start|stop host:addr")
+		log.Println("help")
 	}
 
 	for {
@@ -82,16 +102,25 @@ func main() {
 			parts := spacesRe.Split(line, -1)
 			parts = gut.Map(parts, func(s string) string { return strings.Trim(s, " ") })
 			parts = gut.Filter(parts, func(s string) bool { return len(s) > 0 })
-			if len(parts) < 2 {
-				continue
-			}
 			log.Println("Parts: ", parts)
-			if parts[0] == "ctrl" {
+			if len(parts) < 1 {
+				continue
+			} else if parts[0] == "help" {
+				showHelp()
+			} else if parts[0] == "exit" {
+				os.Exit(0)
+			} else if len(parts) < 2 {
+				log.Println("This command needs at least 2 arguments")
+				continue
+			} else if parts[0] == "ctrl" {
 				if parts[1] == "start" {
 					startController()
 				} else {
 					stopController()
 				}
+			} else if len(parts) < 3 {
+				log.Println("This command needs at least 3 arguments")
+				continue
 			} else if parts[0] == "client" {
 				if parts[1] == "start" {
 					startClient(parts[2])
@@ -111,6 +140,8 @@ func main() {
 						key := parts[3]
 						client, ok := clients[addr]
 				*/
+			} else {
+				log.Println("Invalid command")
 			}
 		}
 	}
