@@ -24,6 +24,9 @@ func (ctrldb *DB) GetTargets(withShards bool, addresses ...string) ([]*Target, e
 		result := ctrldb.storage.First(&out, "address = ?", addresses[0])
 		err := result.Error
 		if err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				err = nil
+			}
 			return []*Target{}, err
 		} else {
 			return []*Target{&out}, err

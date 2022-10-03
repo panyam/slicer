@@ -45,7 +45,7 @@ func (p *Producer) Start() {
 
 	// do the ping
 	go func() {
-		t := time.NewTicker(time.Second)
+		t := time.NewTicker(time.Second * 5)
 		for {
 			<-t.C
 			ctrlSvcClient.Client.PingTarget(context.Background(), &protos.PingTargetRequest{

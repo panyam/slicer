@@ -8,6 +8,7 @@ import (
 	"github.com/panyam/slicer/protos"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"log"
 	"sort"
 	"time"
 )
@@ -15,11 +16,13 @@ import (
 type ControlService struct {
 	protos.UnimplementedControlServiceServer
 	ControlDB db.ControlDB
+	Logger    *log.Logger
 }
 
-func NewControlService(ctrldb db.ControlDB) (out *ControlService) {
+func NewControlService(ctrldb db.ControlDB, logger *log.Logger) (out *ControlService) {
 	out = &ControlService{
 		ControlDB: ctrldb,
+		Logger:    logger,
 	}
 	return
 }
@@ -49,13 +52,18 @@ func (s *ControlService) PingTarget(ctx context.Context, request *protos.PingTar
 				PingedAt: time.Now(),
 				Status:   "ACTIVE",
 			}
-			if err = s.ControlDB.SaveTarget(newtarget); err == nil {
+			err = s.ControlDB.SaveTarget(newtarget)
+			s.Logger.Println("Trying to save: ", newtarget, err)
+			if err == nil {
 				resp = TargetToProto(newtarget)
 			}
 		} else {
 			targets[0].PingedAt = time.Now()
-			if err = s.ControlDB.SaveTarget(targets[0]); err == nil {
+			err = s.ControlDB.SaveTarget(targets[0])
+			if err == nil {
 				resp = TargetToProto(targets[0])
+			} else {
+				s.Logger.Println("SaveTarget error: ", err)
 			}
 		}
 	}

@@ -96,14 +96,20 @@ func (w *WebClient) Start() {
 
 			// our resp has a bunch of addresses - see if we have those here
 			// create a client against this shard's address
-			address := resp.Targets[0].Target
-			newClient, err := clients.NewRpcClient(address, echosvc.NewEchoServiceClient)
-			if err != nil {
-				w.sendResponse(ctx, nil, err)
+			w.Logger.Println("targets: ", resp)
+			if len(resp.Targets) == 0 {
+				ctx.JSON(http.StatusNotFound, gin.H{"error": http.StatusNotFound, "message": "No svc targets found"})
 				return
+			} else {
+				address := resp.Targets[0].Target
+				newClient, err := clients.NewRpcClient(address, echosvc.NewEchoServiceClient)
+				if err != nil {
+					w.sendResponse(ctx, nil, err)
+					return
+				}
+				clientMap[shard] = newClient
+				client = newClient
 			}
-			clientMap[shard] = newClient
-			client = newClient
 		}
 
 		response, err := client.Client.Echo(context.Background(), &echosvc.Request{

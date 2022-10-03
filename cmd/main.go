@@ -93,6 +93,15 @@ func main() {
 		log.Println("help")
 	}
 
+	startController()
+	startProducer(":9000", "a")
+	// startProducer(":9001", "a")
+	// startProducer(":9002", "a")
+
+	startClient(":8000")
+	startClient(":8001")
+	startClient(":8002")
+
 	for {
 		fmt.Print(":-> ")
 		line, err := reader.ReadString('\n')
@@ -121,7 +130,7 @@ func main() {
 			} else if len(parts) < 3 {
 				log.Println("This command needs at least 3 arguments")
 				continue
-			} else if parts[0] == "client" {
+			} else if parts[0] == "client" || parts[0] == "web" {
 				if parts[1] == "start" {
 					startClient(parts[2])
 				} else {
@@ -129,7 +138,11 @@ func main() {
 				}
 			} else if parts[0] == "prod" {
 				if parts[1] == "start" {
-					startProducer(parts[2], parts[3])
+					if len(parts) < 4 {
+						log.Println("This command needs at least 4 arguments")
+					} else {
+						startProducer(parts[2], parts[3])
+					}
 				} else {
 					stopProducer(parts[2])
 				}

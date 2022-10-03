@@ -48,7 +48,7 @@ func (c *Controller) Stop() {
 }
 
 func (c *Controller) Start() {
-	protos.RegisterControlServiceServer(c.grpcServer, service.NewControlService(c.ctrldb))
+	protos.RegisterControlServiceServer(c.grpcServer, service.NewControlService(c.ctrldb, c.Logger))
 	c.Logger.Printf("Initializing Control Server on %s", c.Addr)
 	lis, err := net.Listen("tcp", c.Addr)
 	if err != nil {
