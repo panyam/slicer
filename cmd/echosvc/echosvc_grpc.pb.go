@@ -21,6 +21,7 @@ type EchoServiceClient interface {
 	//*
 	// Returns information about a host as to which shards it (manually) hosts.
 	Echo(ctx context.Context, in *Request, opts ...grpc.CallOption) (*Response, error)
+	UpdatedShards(ctx context.Context, in *UpdateShardsRequest, opts ...grpc.CallOption) (*UpdateShardsResponse, error)
 }
 
 type echoServiceClient struct {
@@ -40,6 +41,15 @@ func (c *echoServiceClient) Echo(ctx context.Context, in *Request, opts ...grpc.
 	return out, nil
 }
 
+func (c *echoServiceClient) UpdatedShards(ctx context.Context, in *UpdateShardsRequest, opts ...grpc.CallOption) (*UpdateShardsResponse, error) {
+	out := new(UpdateShardsResponse)
+	err := c.cc.Invoke(ctx, "/protos.EchoService/UpdatedShards", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // EchoServiceServer is the server API for EchoService service.
 // All implementations must embed UnimplementedEchoServiceServer
 // for forward compatibility
@@ -47,6 +57,7 @@ type EchoServiceServer interface {
 	//*
 	// Returns information about a host as to which shards it (manually) hosts.
 	Echo(context.Context, *Request) (*Response, error)
+	UpdatedShards(context.Context, *UpdateShardsRequest) (*UpdateShardsResponse, error)
 	mustEmbedUnimplementedEchoServiceServer()
 }
 
@@ -56,6 +67,9 @@ type UnimplementedEchoServiceServer struct {
 
 func (UnimplementedEchoServiceServer) Echo(context.Context, *Request) (*Response, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Echo not implemented")
+}
+func (UnimplementedEchoServiceServer) UpdatedShards(context.Context, *UpdateShardsRequest) (*UpdateShardsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdatedShards not implemented")
 }
 func (UnimplementedEchoServiceServer) mustEmbedUnimplementedEchoServiceServer() {}
 
@@ -88,6 +102,24 @@ func _EchoService_Echo_Handler(srv interface{}, ctx context.Context, dec func(in
 	return interceptor(ctx, in, info, handler)
 }
 
+func _EchoService_UpdatedShards_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateShardsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(EchoServiceServer).UpdatedShards(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/protos.EchoService/UpdatedShards",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(EchoServiceServer).UpdatedShards(ctx, req.(*UpdateShardsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // EchoService_ServiceDesc is the grpc.ServiceDesc for EchoService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -98,6 +130,10 @@ var EchoService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Echo",
 			Handler:    _EchoService_Echo_Handler,
+		},
+		{
+			MethodName: "UpdatedShards",
+			Handler:    _EchoService_UpdatedShards_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

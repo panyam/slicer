@@ -10,6 +10,8 @@ service EchoService {
    * Returns information about a host as to which shards it (manually) hosts.
    */
   rpc Echo(Request) returns (Response) {}
+
+  rpc UpdatedShards(UpdateShardsRequest) returns (UpdateShardsResponse) {}
 }
 
 message Request {
@@ -20,4 +22,12 @@ message Request {
 
 message Response {
   string output = 1;
+}
+
+message UpdateShardsRequest {
+  string cmd = 1;
+  repeated string shards = 2;
+}
+
+message UpdateShardsResponse {
 }
