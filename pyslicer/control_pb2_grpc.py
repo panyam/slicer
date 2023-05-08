@@ -61,10 +61,15 @@ class ControlServiceStub(object):
                 request_serializer=protos_dot_control__pb2.ListTargetsRequest.SerializeToString,
                 response_deserializer=protos_dot_control__pb2.ListTargetsResponse.FromString,
                 )
-        self.Connect = channel.stream_stream(
-                '/protos.ControlService/Connect',
-                request_serializer=protos_dot_control__pb2.ControlRequest.SerializeToString,
-                response_deserializer=protos_dot_control__pb2.ControlMessage.FromString,
+        self.ConnectClient = channel.stream_stream(
+                '/protos.ControlService/ConnectClient',
+                request_serializer=protos_dot_control__pb2.ClientControlRequest.SerializeToString,
+                response_deserializer=protos_dot_control__pb2.ClientControlMessage.FromString,
+                )
+        self.ConnectTarget = channel.stream_stream(
+                '/protos.ControlService/ConnectTarget',
+                request_serializer=protos_dot_control__pb2.TargetControlRequest.SerializeToString,
+                response_deserializer=protos_dot_control__pb2.TargetControlMessage.FromString,
                 )
 
 
@@ -144,12 +149,18 @@ class ControlServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def Connect(self, request_iterator, context):
+    def ConnectClient(self, request_iterator, context):
         """*
-        Shard clients (those who need to reach to a particular host that serves a shard)
-        will want to be notified when shard assignments have changed (failover, replicas,
-        rebalancing etc) so that they can reconnect.   This method provides a way for
-        clients to be notified when these have changed.
+        Called by clients interested in being notified about shard assignment updates.
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def ConnectTarget(self, request_iterator, context):
+        """*
+        Called by shard targets/hosts/producers that host the dataplane for a shard and can be
+        commanded to shard assignment requests.
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -198,10 +209,15 @@ def add_ControlServiceServicer_to_server(servicer, server):
                     request_deserializer=protos_dot_control__pb2.ListTargetsRequest.FromString,
                     response_serializer=protos_dot_control__pb2.ListTargetsResponse.SerializeToString,
             ),
-            'Connect': grpc.stream_stream_rpc_method_handler(
-                    servicer.Connect,
-                    request_deserializer=protos_dot_control__pb2.ControlRequest.FromString,
-                    response_serializer=protos_dot_control__pb2.ControlMessage.SerializeToString,
+            'ConnectClient': grpc.stream_stream_rpc_method_handler(
+                    servicer.ConnectClient,
+                    request_deserializer=protos_dot_control__pb2.ClientControlRequest.FromString,
+                    response_serializer=protos_dot_control__pb2.ClientControlMessage.SerializeToString,
+            ),
+            'ConnectTarget': grpc.stream_stream_rpc_method_handler(
+                    servicer.ConnectTarget,
+                    request_deserializer=protos_dot_control__pb2.TargetControlRequest.FromString,
+                    response_serializer=protos_dot_control__pb2.TargetControlMessage.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -357,7 +373,7 @@ class ControlService(object):
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
     @staticmethod
-    def Connect(request_iterator,
+    def ConnectClient(request_iterator,
             target,
             options=(),
             channel_credentials=None,
@@ -367,8 +383,25 @@ class ControlService(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.stream_stream(request_iterator, target, '/protos.ControlService/Connect',
-            protos_dot_control__pb2.ControlRequest.SerializeToString,
-            protos_dot_control__pb2.ControlMessage.FromString,
+        return grpc.experimental.stream_stream(request_iterator, target, '/protos.ControlService/ConnectClient',
+            protos_dot_control__pb2.ClientControlRequest.SerializeToString,
+            protos_dot_control__pb2.ClientControlMessage.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def ConnectTarget(request_iterator,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.stream_stream(request_iterator, target, '/protos.ControlService/ConnectTarget',
+            protos_dot_control__pb2.TargetControlRequest.SerializeToString,
+            protos_dot_control__pb2.TargetControlMessage.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

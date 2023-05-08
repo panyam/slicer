@@ -77,12 +77,15 @@ service ControlService {
   rpc ListTargets(ListTargetsRequest) returns (ListTargetsResponse) {}
 
   /**
-   * Shard clients (those who need to reach to a particular host that serves a shard)
-   * will want to be notified when shard assignments have changed (failover, replicas,
-   * rebalancing etc) so that they can reconnect.   This method provides a way for
-   * clients to be notified when these have changed.
+   * Called by clients interested in being notified about shard assignment updates.
    */
-  rpc Connect(stream ControlRequest) returns (stream ControlMessage);
+  rpc ConnectClient(stream ClientControlRequest) returns (stream ClientControlMessage);
+
+  /**
+   * Called by shard targets/hosts/producers that host the dataplane for a shard and can be
+   * commanded to shard assignment requests.
+   */
+  rpc ConnectTarget(stream TargetControlRequest) returns (stream TargetControlMessage);
 }
 
 message GetTargetsRequest {
@@ -175,13 +178,29 @@ message DeleteShardResponse {
 }
 
 
-message ControlRequest {
-  int64 request_id = 1;
+message ClientControlRequest {
   oneof details {
     SubscribeRequest subscribe_request = 2;
     UnsubscribeRequest unsubscribe_request = 3;
-    AddShardsRequest add_shards_request = 4;
-    RemoveShardsRequest remove_shards_request = 5;
+  }
+}
+
+message TargetControlRequest {
+  oneof details {
+    ShardsUpdatedRequest shard_updated = 1;
+  }
+}
+
+message ClientControlMessage {
+  oneof details {
+    ShardsUpdatedRequest shard_updated = 1;
+  }
+}
+
+message TargetControlMessage {
+  oneof details {
+    AddShardsRequest add_shards_request = 2;
+    RemoveShardsRequest remove_shards_request = 3;
   }
 }
 
@@ -201,6 +220,7 @@ message RemoveShardsRequest {
   repeated Shard shards = 1;
 }
 
-message ControlMessage {
-  int64 request_id = 1;
+message ShardsUpdatedRequest {
+  map<string, ShardState> old_states = 1;
+  map<string, ShardState> new_states = 2;
 }

@@ -43,6 +43,7 @@ func (s *ControlService) GetTargets(ctx context.Context, request *protos.GetTarg
 }
 
 func (s *ControlService) PingTarget(ctx context.Context, request *protos.PingTargetRequest) (resp *protos.Target, err error) {
+	s.Logger.Println("Received ping from: ", request.Address)
 	targets, err := s.ControlDB.GetTargets(false, request.Address)
 	if err == nil {
 		if len(targets) == 0 {
@@ -137,4 +138,96 @@ func (s *ControlService) SaveShard(ctx context.Context, request *protos.SaveShar
 func (s *ControlService) DeleteShard(ctx context.Context, request *protos.DeleteShardRequest) (resp *protos.DeleteShardResponse, err error) {
 	err = s.ControlDB.DeleteShardTargets(request.Key.Key, request.Addresses...)
 	return nil, err
+}
+
+func (s *ControlService) Connect(stream protos.ControlService_ConnectServer) (err error) {
+	/**
+	 * We have two types of connections - either from clients or from producers
+	 */
+	/**
+	 * A new connection has been made that is interested in listening to
+	 * updates for one or more screens (which will be sent as sub/unsub
+	 * requests)
+	 *
+	 * Each time a Send is called (say for one or more screens), it needs to
+	 * be sent to a bunch of these connections that may be interested in it.
+	 *
+	 * we have:
+	 * Connection (interested in X Screens)
+	 * Screen powered by a different topic.
+	 * This is truly a hub architecture instead of fan-in or fan-out
+	 */
+
+	// 1. First start a stream with a reader so we can read sub/unsub
+	// messages on this
+	log.Println("Received a new connection....")
+	reader := conc.NewReader[*protos.ControlRequest, any](stream.Recv)
+	defer reader.Stop()
+
+	// 2. Listen to sub/unsub messages and register/deregister channels
+	// where we can listen to events to be sent on the connection
+	screenIds := make(map[string]<-chan *protos.ScreenEvent)
+	fanIn := conc.NewFanIn[*protos.ScreenEvent](nil)
+	var wg sync.WaitGroup
+	wg.Add(1)
+	connClosedChan := make(chan bool)
+	go func() {
+		defer wg.Done()
+		for {
+			select {
+			case <-connClosedChan:
+				return
+			case msg := <-reader.ResultChannel():
+				log.Println("Received msg on topic: ", msg)
+				if msg.Error != nil {
+					// TODO - Handle and return etc
+					panic(msg.Error)
+				}
+				if msg.Value.GetSubscribeRequest() != nil {
+					screenId := msg.Value.GetSubscribeRequest().ScreenId
+					topic := s.screenClients.Ensure(screenId)
+					if _, ok := screenIds[screenId]; !ok {
+						// find topic corresponding to this msg's screen add this to the
+						// fanout
+						clientChan := topic.New()
+						// TODO - ensure no duplicates
+						screenIds[screenId] = clientChan
+						fanIn.Add(clientChan)
+					}
+				} else if msg.Value.GetUnsubscribeRequest() != nil {
+					screenId := msg.Value.GetUnsubscribeRequest().ScreenId
+					topic := s.screenClients.Ensure(screenId)
+					if clientChan, ok := screenIds[screenId]; ok {
+						// TODO - ensure no duplicates
+						delete(screenIds, screenId)
+						fanIn.Remove(clientChan)
+						topic.Remove(clientChan)
+					}
+				}
+			}
+			break
+		}
+	}()
+
+	// Pause till it is closed - in the mean time the publisher will be sending
+	// messages with queued up events on this channel
+	closed := false
+	for !closed {
+		select {
+		case <-stream.Context().Done():
+			closed = true
+			connClosedChan <- true
+			log.Println("Closing connection to streamer...")
+			break
+		case event := <-fanIn.Channel():
+			log.Println("Received fanIn: ", event)
+			msgproto := protos.Message{Events: []*protos.ScreenEvent{event}}
+			stream.Send(&msgproto)
+			break
+		}
+	}
+
+	wg.Wait()
+	log.Println("All connected readers closed")
+	return
 }

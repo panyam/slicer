@@ -45,11 +45,12 @@ type ControlServiceClient interface {
 	// Return all hosts participating in this cluster.
 	ListTargets(ctx context.Context, in *ListTargetsRequest, opts ...grpc.CallOption) (*ListTargetsResponse, error)
 	//*
-	// Shard clients (those who need to reach to a particular host that serves a shard)
-	// will want to be notified when shard assignments have changed (failover, replicas,
-	// rebalancing etc) so that they can reconnect.   This method provides a way for
-	// clients to be notified when these have changed.
-	Connect(ctx context.Context, opts ...grpc.CallOption) (ControlService_ConnectClient, error)
+	// Called by clients interested in being notified about shard assignment updates.
+	ConnectClient(ctx context.Context, opts ...grpc.CallOption) (ControlService_ConnectClientClient, error)
+	//*
+	// Called by shard targets/hosts/producers that host the dataplane for a shard and can be
+	// commanded to shard assignment requests.
+	ConnectTarget(ctx context.Context, opts ...grpc.CallOption) (ControlService_ConnectTargetClient, error)
 }
 
 type controlServiceClient struct {
@@ -132,31 +133,62 @@ func (c *controlServiceClient) ListTargets(ctx context.Context, in *ListTargetsR
 	return out, nil
 }
 
-func (c *controlServiceClient) Connect(ctx context.Context, opts ...grpc.CallOption) (ControlService_ConnectClient, error) {
-	stream, err := c.cc.NewStream(ctx, &ControlService_ServiceDesc.Streams[0], "/protos.ControlService/Connect", opts...)
+func (c *controlServiceClient) ConnectClient(ctx context.Context, opts ...grpc.CallOption) (ControlService_ConnectClientClient, error) {
+	stream, err := c.cc.NewStream(ctx, &ControlService_ServiceDesc.Streams[0], "/protos.ControlService/ConnectClient", opts...)
 	if err != nil {
 		return nil, err
 	}
-	x := &controlServiceConnectClient{stream}
+	x := &controlServiceConnectClientClient{stream}
 	return x, nil
 }
 
-type ControlService_ConnectClient interface {
-	Send(*ControlRequest) error
-	Recv() (*ControlMessage, error)
+type ControlService_ConnectClientClient interface {
+	Send(*ClientControlRequest) error
+	Recv() (*ClientControlMessage, error)
 	grpc.ClientStream
 }
 
-type controlServiceConnectClient struct {
+type controlServiceConnectClientClient struct {
 	grpc.ClientStream
 }
 
-func (x *controlServiceConnectClient) Send(m *ControlRequest) error {
+func (x *controlServiceConnectClientClient) Send(m *ClientControlRequest) error {
 	return x.ClientStream.SendMsg(m)
 }
 
-func (x *controlServiceConnectClient) Recv() (*ControlMessage, error) {
-	m := new(ControlMessage)
+func (x *controlServiceConnectClientClient) Recv() (*ClientControlMessage, error) {
+	m := new(ClientControlMessage)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
+func (c *controlServiceClient) ConnectTarget(ctx context.Context, opts ...grpc.CallOption) (ControlService_ConnectTargetClient, error) {
+	stream, err := c.cc.NewStream(ctx, &ControlService_ServiceDesc.Streams[1], "/protos.ControlService/ConnectTarget", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &controlServiceConnectTargetClient{stream}
+	return x, nil
+}
+
+type ControlService_ConnectTargetClient interface {
+	Send(*TargetControlRequest) error
+	Recv() (*TargetControlMessage, error)
+	grpc.ClientStream
+}
+
+type controlServiceConnectTargetClient struct {
+	grpc.ClientStream
+}
+
+func (x *controlServiceConnectTargetClient) Send(m *TargetControlRequest) error {
+	return x.ClientStream.SendMsg(m)
+}
+
+func (x *controlServiceConnectTargetClient) Recv() (*TargetControlMessage, error) {
+	m := new(TargetControlMessage)
 	if err := x.ClientStream.RecvMsg(m); err != nil {
 		return nil, err
 	}
@@ -194,11 +226,12 @@ type ControlServiceServer interface {
 	// Return all hosts participating in this cluster.
 	ListTargets(context.Context, *ListTargetsRequest) (*ListTargetsResponse, error)
 	//*
-	// Shard clients (those who need to reach to a particular host that serves a shard)
-	// will want to be notified when shard assignments have changed (failover, replicas,
-	// rebalancing etc) so that they can reconnect.   This method provides a way for
-	// clients to be notified when these have changed.
-	Connect(ControlService_ConnectServer) error
+	// Called by clients interested in being notified about shard assignment updates.
+	ConnectClient(ControlService_ConnectClientServer) error
+	//*
+	// Called by shard targets/hosts/producers that host the dataplane for a shard and can be
+	// commanded to shard assignment requests.
+	ConnectTarget(ControlService_ConnectTargetServer) error
 	mustEmbedUnimplementedControlServiceServer()
 }
 
@@ -230,8 +263,11 @@ func (UnimplementedControlServiceServer) DeleteTargets(context.Context, *DeleteT
 func (UnimplementedControlServiceServer) ListTargets(context.Context, *ListTargetsRequest) (*ListTargetsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListTargets not implemented")
 }
-func (UnimplementedControlServiceServer) Connect(ControlService_ConnectServer) error {
-	return status.Errorf(codes.Unimplemented, "method Connect not implemented")
+func (UnimplementedControlServiceServer) ConnectClient(ControlService_ConnectClientServer) error {
+	return status.Errorf(codes.Unimplemented, "method ConnectClient not implemented")
+}
+func (UnimplementedControlServiceServer) ConnectTarget(ControlService_ConnectTargetServer) error {
+	return status.Errorf(codes.Unimplemented, "method ConnectTarget not implemented")
 }
 func (UnimplementedControlServiceServer) mustEmbedUnimplementedControlServiceServer() {}
 
@@ -390,26 +426,52 @@ func _ControlService_ListTargets_Handler(srv interface{}, ctx context.Context, d
 	return interceptor(ctx, in, info, handler)
 }
 
-func _ControlService_Connect_Handler(srv interface{}, stream grpc.ServerStream) error {
-	return srv.(ControlServiceServer).Connect(&controlServiceConnectServer{stream})
+func _ControlService_ConnectClient_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(ControlServiceServer).ConnectClient(&controlServiceConnectClientServer{stream})
 }
 
-type ControlService_ConnectServer interface {
-	Send(*ControlMessage) error
-	Recv() (*ControlRequest, error)
+type ControlService_ConnectClientServer interface {
+	Send(*ClientControlMessage) error
+	Recv() (*ClientControlRequest, error)
 	grpc.ServerStream
 }
 
-type controlServiceConnectServer struct {
+type controlServiceConnectClientServer struct {
 	grpc.ServerStream
 }
 
-func (x *controlServiceConnectServer) Send(m *ControlMessage) error {
+func (x *controlServiceConnectClientServer) Send(m *ClientControlMessage) error {
 	return x.ServerStream.SendMsg(m)
 }
 
-func (x *controlServiceConnectServer) Recv() (*ControlRequest, error) {
-	m := new(ControlRequest)
+func (x *controlServiceConnectClientServer) Recv() (*ClientControlRequest, error) {
+	m := new(ClientControlRequest)
+	if err := x.ServerStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
+func _ControlService_ConnectTarget_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(ControlServiceServer).ConnectTarget(&controlServiceConnectTargetServer{stream})
+}
+
+type ControlService_ConnectTargetServer interface {
+	Send(*TargetControlMessage) error
+	Recv() (*TargetControlRequest, error)
+	grpc.ServerStream
+}
+
+type controlServiceConnectTargetServer struct {
+	grpc.ServerStream
+}
+
+func (x *controlServiceConnectTargetServer) Send(m *TargetControlMessage) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+func (x *controlServiceConnectTargetServer) Recv() (*TargetControlRequest, error) {
+	m := new(TargetControlRequest)
 	if err := x.ServerStream.RecvMsg(m); err != nil {
 		return nil, err
 	}
@@ -458,8 +520,14 @@ var ControlService_ServiceDesc = grpc.ServiceDesc{
 	},
 	Streams: []grpc.StreamDesc{
 		{
-			StreamName:    "Connect",
-			Handler:       _ControlService_Connect_Handler,
+			StreamName:    "ConnectClient",
+			Handler:       _ControlService_ConnectClient_Handler,
+			ServerStreams: true,
+			ClientStreams: true,
+		},
+		{
+			StreamName:    "ConnectTarget",
+			Handler:       _ControlService_ConnectTarget_Handler,
 			ServerStreams: true,
 			ClientStreams: true,
 		},

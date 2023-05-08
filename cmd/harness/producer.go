@@ -30,7 +30,7 @@ func NewProducer(prefix string, addr string, control_addr string, logfile io.Wri
 		// grpc.StreamInterceptor(grpc_prometheus.StreamServerInterceptor),
 		// grpc.UnaryInterceptor(grpc_prometheus.UnaryServerInterceptor),
 		),
-		Logger: log.New(logfile, fmt.Sprintf("PROD:[%s]", addr), log.Ldate|log.Ltime|log.Lshortfile),
+		Logger: log.New(logfile, fmt.Sprintf("PROD[%s] ", addr), log.Ldate|log.Ltime|log.Lshortfile),
 	}
 	return &out
 }

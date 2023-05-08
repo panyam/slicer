@@ -44,7 +44,7 @@ func NewWebClient(addr string, logfile io.Writer) *WebClient {
 		Addr:        addr,
 		ControlAddr: "localhost:7000",
 		Router:      gin.Default(),
-		Logger:      log.New(logfile, fmt.Sprintf("CLNT:[%s]", addr), log.Ldate|log.Ltime|log.Lshortfile),
+		Logger:      log.New(logfile, fmt.Sprintf("CLNT[%s] ", addr), log.Ldate|log.Ltime|log.Lshortfile),
 	}
 	out.Router.Use(gin.LoggerWithWriter(logfile))
 	return &out

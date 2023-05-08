@@ -32,7 +32,7 @@ func NewController(addr string, db_endpoint string, logfile io.Writer) *Controll
 		// grpc.StreamInterceptor(grpc_prometheus.StreamServerInterceptor),
 		// grpc.UnaryInterceptor(grpc_prometheus.UnaryServerInterceptor),
 		),
-		Logger: log.New(logfile, fmt.Sprintf("CTRL:[%s]", addr), log.Ldate|log.Ltime|log.Lshortfile),
+		Logger: log.New(logfile, fmt.Sprintf("CTRL[%s] ", addr), log.Ldate|log.Ltime|log.Lshortfile),
 	}
 	gormdb, err := OpenDB(db_endpoint)
 	if err != nil {

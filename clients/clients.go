@@ -8,6 +8,7 @@ import (
 type StaticClientMgr[T any] struct {
 	// TODO - turn this into a list?
 	StaticAddress string
+	CachedClient  *RpcClient[T]
 	ClientCreator func(grpc.ClientConnInterface) T
 }
 
@@ -18,8 +19,14 @@ func NewStaticClientMgr[T any](addr string, clientCreator func(grpc.ClientConnIn
 	}
 }
 
-func (ssm *StaticClientMgr[T]) GetClient(entityId string) (*RpcClient[T], error) {
-	return NewRpcClient[T](ssm.StaticAddress, ssm.ClientCreator)
+func (ssm *StaticClientMgr[T]) GetClient(entityId string) (_ *RpcClient[T], err error) {
+	if ssm.CachedClient != nil {
+		ssm.CachedClient, err = NewRpcClient(ssm.StaticAddress, ssm.ClientCreator)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return ssm.CachedClient, nil
 }
 
 // A shardec client manager using the control service

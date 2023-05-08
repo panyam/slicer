@@ -15,7 +15,7 @@ from google.protobuf import timestamp_pb2 as google_dot_protobuf_dot_timestamp__
 from google.protobuf import field_mask_pb2 as google_dot_protobuf_dot_field__mask__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x14protos/control.proto\x12\x06protos\x1a\x1fgoogle/protobuf/timestamp.proto\x1a google/protobuf/field_mask.proto\"<\n\x11GetTargetsRequest\x12\x0f\n\x07\x61\x64\x64ress\x18\x01 \x03(\t\x12\x16\n\x0einclude_shards\x18\x02 \x01(\x08\"5\n\x12GetTargetsResponse\x12\x1f\n\x07targets\x18\x01 \x03(\x0b\x32\x0e.protos.Target\"\xb8\x01\n\x06Target\x12\x0f\n\x07\x61\x64\x64ress\x18\x01 \x01(\t\x12\x0e\n\x06status\x18\x02 \x01(\t\x12.\n\nupdated_at\x18\x03 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12-\n\tpinged_at\x18\x04 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\x0c\n\x04tags\x18\x05 \x03(\t\x12 \n\x06shards\x18\x06 \x03(\x0b\x32\x10.protos.ShardKey\",\n\x12ListTargetsRequest\x12\x16\n\x0einclude_shards\x18\x01 \x01(\x08\"4\n\x13ListTargetsResponse\x12\x1d\n\x05hosts\x18\x01 \x03(\x0b\x32\x0e.protos.Target\"$\n\x11PingTargetRequest\x12\x0f\n\x07\x61\x64\x64ress\x18\x01 \x01(\t\"d\n\x11SaveTargetRequest\x12\x1e\n\x06target\x18\x01 \x01(\x0b\x32\x0e.protos.Target\x12/\n\x0bupdate_mask\x18\x02 \x01(\x0b\x32\x1a.google.protobuf.FieldMask\")\n\x14\x44\x65leteTargetsRequest\x12\x11\n\taddresses\x18\x01 \x03(\t\"\x17\n\x15\x44\x65leteTargetsResponse\"\x17\n\x08ShardKey\x12\x0b\n\x03key\x18\x01 \x01(\t\"2\n\x0fGetShardRequest\x12\x1f\n\x05shard\x18\x01 \x01(\x0b\x32\x10.protos.ShardKey\"\xd9\x01\n\x10GetShardResponse\x12\x1d\n\x03key\x18\x01 \x01(\x0b\x32\x10.protos.ShardKey\x12$\n\x07targets\x18\x02 \x03(\x0b\x32\x13.protos.ShardTarget\x12=\n\x0btarget_info\x18\x03 \x03(\x0b\x32(.protos.GetShardResponse.TargetInfoEntry\x1a\x41\n\x0fTargetInfoEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\x1d\n\x05value\x18\x02 \x01(\x0b\x32\x0e.protos.Target:\x02\x38\x01\"L\n\x05Shard\x12\x1d\n\x03key\x18\x01 \x01(\x0b\x32\x10.protos.ShardKey\x12$\n\x07targets\x18\x02 \x03(\x0b\x32\x13.protos.ShardTarget\"\x8d\x01\n\x0bShardTarget\x12.\n\ncreated_at\x18\x01 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12.\n\nupdated_at\x18\x02 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\x0e\n\x06target\x18\x04 \x01(\t\x12\x0e\n\x06status\x18\x05 \x01(\t\"e\n\x10SaveShardRequest\x12\x1d\n\x03key\x18\x01 \x01(\x0b\x32\x10.protos.ShardKey\x12\r\n\x05\x61\x64\x64\x65\x64\x18\x02 \x03(\t\x12\x0f\n\x07removed\x18\x03 \x03(\t\x12\x12\n\nremove_all\x18\x04 \x01(\x08\"\x13\n\x11SaveShardResponse\"F\n\x12\x44\x65leteShardRequest\x12\x1d\n\x03key\x18\x01 \x01(\x0b\x32\x10.protos.ShardKey\x12\x11\n\taddresses\x18\x02 \x03(\t\"\x15\n\x13\x44\x65leteShardResponse\"\x97\x02\n\x0e\x43ontrolRequest\x12\x12\n\nrequest_id\x18\x01 \x01(\x03\x12\x35\n\x11subscribe_request\x18\x02 \x01(\x0b\x32\x18.protos.SubscribeRequestH\x00\x12\x39\n\x13unsubscribe_request\x18\x03 \x01(\x0b\x32\x1a.protos.UnsubscribeRequestH\x00\x12\x36\n\x12\x61\x64\x64_shards_request\x18\x04 \x01(\x0b\x32\x18.protos.AddShardsRequestH\x00\x12<\n\x15remove_shards_request\x18\x05 \x01(\x0b\x32\x1b.protos.RemoveShardsRequestH\x00\x42\t\n\x07\x64\x65tails\"1\n\x10SubscribeRequest\x12\x1d\n\x06shards\x18\x01 \x03(\x0b\x32\r.protos.Shard\"3\n\x12UnsubscribeRequest\x12\x1d\n\x06shards\x18\x01 \x03(\x0b\x32\r.protos.Shard\"1\n\x10\x41\x64\x64ShardsRequest\x12\x1d\n\x06shards\x18\x01 \x03(\x0b\x32\r.protos.Shard\"4\n\x13RemoveShardsRequest\x12\x1d\n\x06shards\x18\x01 \x03(\x0b\x32\r.protos.Shard\"$\n\x0e\x43ontrolMessage\x12\x12\n\nrequest_id\x18\x01 \x01(\x03*6\n\nShardState\x12\n\n\x06\x41\x43TIVE\x10\x00\x12\x0f\n\x0bUNAVAILABLE\x10\x01\x12\x0b\n\x07SYNCING\x10\x02\x32\xf5\x04\n\x0e\x43ontrolService\x12?\n\x08GetShard\x12\x17.protos.GetShardRequest\x1a\x18.protos.GetShardResponse\"\x00\x12\x42\n\tSaveShard\x12\x18.protos.SaveShardRequest\x1a\x19.protos.SaveShardResponse\"\x00\x12H\n\x0b\x44\x65leteShard\x12\x1a.protos.DeleteShardRequest\x1a\x1b.protos.DeleteShardResponse\"\x00\x12\x45\n\nGetTargets\x12\x19.protos.GetTargetsRequest\x1a\x1a.protos.GetTargetsResponse\"\x00\x12\x39\n\nPingTarget\x12\x19.protos.PingTargetRequest\x1a\x0e.protos.Target\"\x00\x12\x39\n\nSaveTarget\x12\x19.protos.SaveTargetRequest\x1a\x0e.protos.Target\"\x00\x12N\n\rDeleteTargets\x12\x1c.protos.DeleteTargetsRequest\x1a\x1d.protos.DeleteTargetsResponse\"\x00\x12H\n\x0bListTargets\x12\x1a.protos.ListTargetsRequest\x1a\x1b.protos.ListTargetsResponse\"\x00\x12=\n\x07\x43onnect\x12\x16.protos.ControlRequest\x1a\x16.protos.ControlMessage(\x01\x30\x01\x42!Z\x1fgithub.com/panyam/slicer/protosb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x14protos/control.proto\x12\x06protos\x1a\x1fgoogle/protobuf/timestamp.proto\x1a google/protobuf/field_mask.proto\"<\n\x11GetTargetsRequest\x12\x0f\n\x07\x61\x64\x64ress\x18\x01 \x03(\t\x12\x16\n\x0einclude_shards\x18\x02 \x01(\x08\"5\n\x12GetTargetsResponse\x12\x1f\n\x07targets\x18\x01 \x03(\x0b\x32\x0e.protos.Target\"\xb8\x01\n\x06Target\x12\x0f\n\x07\x61\x64\x64ress\x18\x01 \x01(\t\x12\x0e\n\x06status\x18\x02 \x01(\t\x12.\n\nupdated_at\x18\x03 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12-\n\tpinged_at\x18\x04 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\x0c\n\x04tags\x18\x05 \x03(\t\x12 \n\x06shards\x18\x06 \x03(\x0b\x32\x10.protos.ShardKey\",\n\x12ListTargetsRequest\x12\x16\n\x0einclude_shards\x18\x01 \x01(\x08\"4\n\x13ListTargetsResponse\x12\x1d\n\x05hosts\x18\x01 \x03(\x0b\x32\x0e.protos.Target\"$\n\x11PingTargetRequest\x12\x0f\n\x07\x61\x64\x64ress\x18\x01 \x01(\t\"d\n\x11SaveTargetRequest\x12\x1e\n\x06target\x18\x01 \x01(\x0b\x32\x0e.protos.Target\x12/\n\x0bupdate_mask\x18\x02 \x01(\x0b\x32\x1a.google.protobuf.FieldMask\")\n\x14\x44\x65leteTargetsRequest\x12\x11\n\taddresses\x18\x01 \x03(\t\"\x17\n\x15\x44\x65leteTargetsResponse\"\x17\n\x08ShardKey\x12\x0b\n\x03key\x18\x01 \x01(\t\"2\n\x0fGetShardRequest\x12\x1f\n\x05shard\x18\x01 \x01(\x0b\x32\x10.protos.ShardKey\"\xd9\x01\n\x10GetShardResponse\x12\x1d\n\x03key\x18\x01 \x01(\x0b\x32\x10.protos.ShardKey\x12$\n\x07targets\x18\x02 \x03(\x0b\x32\x13.protos.ShardTarget\x12=\n\x0btarget_info\x18\x03 \x03(\x0b\x32(.protos.GetShardResponse.TargetInfoEntry\x1a\x41\n\x0fTargetInfoEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\x1d\n\x05value\x18\x02 \x01(\x0b\x32\x0e.protos.Target:\x02\x38\x01\"L\n\x05Shard\x12\x1d\n\x03key\x18\x01 \x01(\x0b\x32\x10.protos.ShardKey\x12$\n\x07targets\x18\x02 \x03(\x0b\x32\x13.protos.ShardTarget\"\x8d\x01\n\x0bShardTarget\x12.\n\ncreated_at\x18\x01 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12.\n\nupdated_at\x18\x02 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\x0e\n\x06target\x18\x04 \x01(\t\x12\x0e\n\x06status\x18\x05 \x01(\t\"e\n\x10SaveShardRequest\x12\x1d\n\x03key\x18\x01 \x01(\x0b\x32\x10.protos.ShardKey\x12\r\n\x05\x61\x64\x64\x65\x64\x18\x02 \x03(\t\x12\x0f\n\x07removed\x18\x03 \x03(\t\x12\x12\n\nremove_all\x18\x04 \x01(\x08\"\x13\n\x11SaveShardResponse\"F\n\x12\x44\x65leteShardRequest\x12\x1d\n\x03key\x18\x01 \x01(\x0b\x32\x10.protos.ShardKey\x12\x11\n\taddresses\x18\x02 \x03(\t\"\x15\n\x13\x44\x65leteShardResponse\"\x93\x01\n\x14\x43lientControlRequest\x12\x35\n\x11subscribe_request\x18\x02 \x01(\x0b\x32\x18.protos.SubscribeRequestH\x00\x12\x39\n\x13unsubscribe_request\x18\x03 \x01(\x0b\x32\x1a.protos.UnsubscribeRequestH\x00\x42\t\n\x07\x64\x65tails\"X\n\x14TargetControlRequest\x12\x35\n\rshard_updated\x18\x01 \x01(\x0b\x32\x1c.protos.ShardsUpdatedRequestH\x00\x42\t\n\x07\x64\x65tails\"X\n\x14\x43lientControlMessage\x12\x35\n\rshard_updated\x18\x01 \x01(\x0b\x32\x1c.protos.ShardsUpdatedRequestH\x00\x42\t\n\x07\x64\x65tails\"\x97\x01\n\x14TargetControlMessage\x12\x36\n\x12\x61\x64\x64_shards_request\x18\x02 \x01(\x0b\x32\x18.protos.AddShardsRequestH\x00\x12<\n\x15remove_shards_request\x18\x03 \x01(\x0b\x32\x1b.protos.RemoveShardsRequestH\x00\x42\t\n\x07\x64\x65tails\"1\n\x10SubscribeRequest\x12\x1d\n\x06shards\x18\x01 \x03(\x0b\x32\r.protos.Shard\"3\n\x12UnsubscribeRequest\x12\x1d\n\x06shards\x18\x01 \x03(\x0b\x32\r.protos.Shard\"1\n\x10\x41\x64\x64ShardsRequest\x12\x1d\n\x06shards\x18\x01 \x03(\x0b\x32\r.protos.Shard\"4\n\x13RemoveShardsRequest\x12\x1d\n\x06shards\x18\x01 \x03(\x0b\x32\r.protos.Shard\"\xa4\x02\n\x14ShardsUpdatedRequest\x12?\n\nold_states\x18\x01 \x03(\x0b\x32+.protos.ShardsUpdatedRequest.OldStatesEntry\x12?\n\nnew_states\x18\x02 \x03(\x0b\x32+.protos.ShardsUpdatedRequest.NewStatesEntry\x1a\x44\n\x0eOldStatesEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12!\n\x05value\x18\x02 \x01(\x0e\x32\x12.protos.ShardState:\x02\x38\x01\x1a\x44\n\x0eNewStatesEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12!\n\x05value\x18\x02 \x01(\x0e\x32\x12.protos.ShardState:\x02\x38\x01*6\n\nShardState\x12\n\n\x06\x41\x43TIVE\x10\x00\x12\x0f\n\x0bUNAVAILABLE\x10\x01\x12\x0b\n\x07SYNCING\x10\x02\x32\xd8\x05\n\x0e\x43ontrolService\x12?\n\x08GetShard\x12\x17.protos.GetShardRequest\x1a\x18.protos.GetShardResponse\"\x00\x12\x42\n\tSaveShard\x12\x18.protos.SaveShardRequest\x1a\x19.protos.SaveShardResponse\"\x00\x12H\n\x0b\x44\x65leteShard\x12\x1a.protos.DeleteShardRequest\x1a\x1b.protos.DeleteShardResponse\"\x00\x12\x45\n\nGetTargets\x12\x19.protos.GetTargetsRequest\x1a\x1a.protos.GetTargetsResponse\"\x00\x12\x39\n\nPingTarget\x12\x19.protos.PingTargetRequest\x1a\x0e.protos.Target\"\x00\x12\x39\n\nSaveTarget\x12\x19.protos.SaveTargetRequest\x1a\x0e.protos.Target\"\x00\x12N\n\rDeleteTargets\x12\x1c.protos.DeleteTargetsRequest\x1a\x1d.protos.DeleteTargetsResponse\"\x00\x12H\n\x0bListTargets\x12\x1a.protos.ListTargetsRequest\x1a\x1b.protos.ListTargetsResponse\"\x00\x12O\n\rConnectClient\x12\x1c.protos.ClientControlRequest\x1a\x1c.protos.ClientControlMessage(\x01\x30\x01\x12O\n\rConnectTarget\x12\x1c.protos.TargetControlRequest\x1a\x1c.protos.TargetControlMessage(\x01\x30\x01\x42!Z\x1fgithub.com/panyam/slicer/protosb\x06proto3')
 
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, globals())
 _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'protos.control_pb2', globals())
@@ -25,8 +25,12 @@ if _descriptor._USE_C_DESCRIPTORS == False:
   DESCRIPTOR._serialized_options = b'Z\037github.com/panyam/slicer/protos'
   _GETSHARDRESPONSE_TARGETINFOENTRY._options = None
   _GETSHARDRESPONSE_TARGETINFOENTRY._serialized_options = b'8\001'
-  _SHARDSTATE._serialized_start=1978
-  _SHARDSTATE._serialized_end=2032
+  _SHARDSUPDATEDREQUEST_OLDSTATESENTRY._options = None
+  _SHARDSUPDATEDREQUEST_OLDSTATESENTRY._serialized_options = b'8\001'
+  _SHARDSUPDATEDREQUEST_NEWSTATESENTRY._options = None
+  _SHARDSUPDATEDREQUEST_NEWSTATESENTRY._serialized_options = b'8\001'
+  _SHARDSTATE._serialized_start=2437
+  _SHARDSTATE._serialized_end=2491
   _GETTARGETSREQUEST._serialized_start=99
   _GETTARGETSREQUEST._serialized_end=159
   _GETTARGETSRESPONSE._serialized_start=161
@@ -65,18 +69,28 @@ if _descriptor._USE_C_DESCRIPTORS == False:
   _DELETESHARDREQUEST._serialized_end=1424
   _DELETESHARDRESPONSE._serialized_start=1426
   _DELETESHARDRESPONSE._serialized_end=1447
-  _CONTROLREQUEST._serialized_start=1450
-  _CONTROLREQUEST._serialized_end=1729
-  _SUBSCRIBEREQUEST._serialized_start=1731
-  _SUBSCRIBEREQUEST._serialized_end=1780
-  _UNSUBSCRIBEREQUEST._serialized_start=1782
-  _UNSUBSCRIBEREQUEST._serialized_end=1833
-  _ADDSHARDSREQUEST._serialized_start=1835
-  _ADDSHARDSREQUEST._serialized_end=1884
-  _REMOVESHARDSREQUEST._serialized_start=1886
-  _REMOVESHARDSREQUEST._serialized_end=1938
-  _CONTROLMESSAGE._serialized_start=1940
-  _CONTROLMESSAGE._serialized_end=1976
-  _CONTROLSERVICE._serialized_start=2035
-  _CONTROLSERVICE._serialized_end=2664
+  _CLIENTCONTROLREQUEST._serialized_start=1450
+  _CLIENTCONTROLREQUEST._serialized_end=1597
+  _TARGETCONTROLREQUEST._serialized_start=1599
+  _TARGETCONTROLREQUEST._serialized_end=1687
+  _CLIENTCONTROLMESSAGE._serialized_start=1689
+  _CLIENTCONTROLMESSAGE._serialized_end=1777
+  _TARGETCONTROLMESSAGE._serialized_start=1780
+  _TARGETCONTROLMESSAGE._serialized_end=1931
+  _SUBSCRIBEREQUEST._serialized_start=1933
+  _SUBSCRIBEREQUEST._serialized_end=1982
+  _UNSUBSCRIBEREQUEST._serialized_start=1984
+  _UNSUBSCRIBEREQUEST._serialized_end=2035
+  _ADDSHARDSREQUEST._serialized_start=2037
+  _ADDSHARDSREQUEST._serialized_end=2086
+  _REMOVESHARDSREQUEST._serialized_start=2088
+  _REMOVESHARDSREQUEST._serialized_end=2140
+  _SHARDSUPDATEDREQUEST._serialized_start=2143
+  _SHARDSUPDATEDREQUEST._serialized_end=2435
+  _SHARDSUPDATEDREQUEST_OLDSTATESENTRY._serialized_start=2297
+  _SHARDSUPDATEDREQUEST_OLDSTATESENTRY._serialized_end=2365
+  _SHARDSUPDATEDREQUEST_NEWSTATESENTRY._serialized_start=2367
+  _SHARDSUPDATEDREQUEST_NEWSTATESENTRY._serialized_end=2435
+  _CONTROLSERVICE._serialized_start=2494
+  _CONTROLSERVICE._serialized_end=3222
 # @@protoc_insertion_point(module_scope)
