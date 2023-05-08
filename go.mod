@@ -1,13 +1,16 @@
 module github.com/panyam/slicer
 
-go 1.20
+go 1.19
 
 require (
+	github.com/gin-gonic/gin v1.8.1
 	github.com/lib/pq v1.10.7
 	github.com/panyam/goutils v0.0.22
 	github.com/stretchr/testify v1.8.0
 	google.golang.org/grpc v1.49.0
 	google.golang.org/protobuf v1.28.0
+	gorm.io/driver/postgres v1.3.10
+	gorm.io/driver/sqlite v1.3.6
 	gorm.io/gorm v1.23.8
 )
 
@@ -16,7 +19,6 @@ replace github.com/panyam/goutils v0.0.22 => ../../golang/goutils/
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/gin-contrib/sse v0.1.0 // indirect
-	github.com/gin-gonic/gin v1.8.1 // indirect
 	github.com/go-playground/locales v0.14.0 // indirect
 	github.com/go-playground/universal-translator v0.18.0 // indirect
 	github.com/go-playground/validator/v10 v10.10.0 // indirect
@@ -48,8 +50,6 @@ require (
 	google.golang.org/genproto v0.0.0-20200526211855-cb27e3aa2013 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-	gorm.io/driver/postgres v1.3.10 // indirect
-	gorm.io/driver/sqlite v1.3.6 // indirect
 )
 
 // replace github.com/panyam/goutils v0.0.22 => ../../golang/goutils/
