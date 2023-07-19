@@ -20,7 +20,7 @@ func NewStaticClientMgr[T any](addr string, clientCreator func(grpc.ClientConnIn
 }
 
 func (ssm *StaticClientMgr[T]) GetClient(entityId string) (_ *RpcClient[T], err error) {
-	if ssm.CachedClient != nil {
+	if ssm.CachedClient == nil {
 		ssm.CachedClient, err = NewRpcClient(ssm.StaticAddress, ssm.ClientCreator)
 		if err != nil {
 			return nil, err
